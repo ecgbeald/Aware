@@ -32,7 +32,14 @@ class MainActivity : AppCompatActivity() {
         val retrofit = RetrofitClient.getInstance()
         val apiInterface = retrofit.create(ApiInterface::class.java)
         apiInterface
-            .addMarker(Marker(id = null, title = "foo", description = "bar", lat = 0.0, lng = 0.0, priority = 0))
+            .addMarker(
+                Marker(id = null, title = binding.title.text.toString(),
+                    description = binding.description.text.toString(),
+                    lat = binding.lat.text.toString().toDoubleOrNull(),
+                    lng = binding.lng.text.toString().toDoubleOrNull(),
+                    priority = binding.priority.text.toString().toIntOrNull()
+                )
+            )
             .enqueue(object: Callback<Marker> {
                 override fun onResponse(call: Call<Marker>, response: Response<Marker>) {
                     binding.txtData.text = response.body().toString()
