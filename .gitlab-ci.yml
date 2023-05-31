@@ -2,6 +2,7 @@ image: openjdk:17-jdk-bullseye
 
 stages:
 - build
+- test
 
 before_script:
 
@@ -51,3 +52,10 @@ build:
   artifacts:
     paths:
     - app/build/outputs/
+
+test:
+  tags:
+    - drp
+  stage: test
+  script:
+  - ./gradlew test
