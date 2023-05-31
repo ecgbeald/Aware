@@ -9,6 +9,7 @@ import retrofit2.Response
 import uk.ac.ic.doc.aware.api.ApiInterface
 import uk.ac.ic.doc.aware.api.RetrofitClient
 import uk.ac.ic.doc.aware.databinding.ActivityMainBinding
+import uk.ac.ic.doc.aware.models.Marker
 import uk.ac.ic.doc.aware.models.MarkerList
 
 class MainActivity : AppCompatActivity() {
@@ -22,6 +23,24 @@ class MainActivity : AppCompatActivity() {
         binding.getButton.setOnClickListener {
             getMarkerList()
         }
+        binding.addButton.setOnClickListener {
+            addMarker()
+        }
+    }
+
+    private fun addMarker() {
+        val retrofit = RetrofitClient.getInstance()
+        val apiInterface = retrofit.create(ApiInterface::class.java)
+        apiInterface
+            .addMarker(Marker(id = null, title = "foo", description = "bar", lat = 0.0, lng = 0.0, priority = 0))
+            .enqueue(object: Callback<Marker> {
+                override fun onResponse(call: Call<Marker>, response: Response<Marker>) {
+                    binding.txtData.text = response.body().toString()
+                }
+                override fun onFailure(call: Call<Marker>, t: Throwable) {
+                    Toast.makeText(applicationContext, t.message, Toast.LENGTH_LONG).show()
+                }
+            })
     }
 
     private fun getMarkerList() {
