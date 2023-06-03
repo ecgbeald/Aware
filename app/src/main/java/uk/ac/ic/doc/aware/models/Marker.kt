@@ -8,5 +8,6 @@ data class Marker(
     @SerializedName("description" ) var description : String? = null,
     @SerializedName("lat"         ) var lat         : Double? = null,
     @SerializedName("lng"         ) var lng         : Double? = null,
-    @SerializedName("priority"    ) var priority    : Int?    = null
+    @SerializedName("priority"    ) var priority    : Int?    = null,
+    @SerializedName("date"    )     var date        : String? = null
 )
