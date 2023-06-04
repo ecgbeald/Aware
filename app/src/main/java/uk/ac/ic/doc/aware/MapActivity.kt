@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -35,6 +36,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(R.layout.activity_map)
         val mapFragment = supportFragmentManager.findFragmentById(R.id.maps) as SupportMapFragment
         mapFragment.getMapAsync(this)
+        findViewById<ImageButton>(R.id.refresh_button).setOnClickListener {
+            Toast.makeText(this@MapActivity, "refreshing...", Toast.LENGTH_SHORT).show()
+            mClusterManager.clearItems()
+            mClusterManager.cluster()
+            getMarkers()
+        }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -101,13 +108,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                         )
                     )
                 }
-//                testing purposes
-//                mClusterManager.addItem(ClusterMarker(51.490, -0.196, "h1", "idk"))
-//                mClusterManager.addItem(ClusterMarker(51.491, -0.196, "h1", "idk"))
-//                mClusterManager.addItem(ClusterMarker(51.492, -0.196, "h1", "idk"))
-//                mClusterManager.addItem(ClusterMarker(51.493, -0.196, "h1", "idk"))
-//                mClusterManager.addItem(ClusterMarker(51.494, -0.196, "h1", "idk"))
-//                mClusterManager.addItem(ClusterMarker(51.495, -0.196, "h1", "idk"))
                 mClusterManager.cluster()
             }
 
@@ -116,5 +116,15 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             }
 
         })
+    }
+
+    private fun debugAddItems() {
+        // only call this after cluster manager is initialised!
+        mClusterManager.addItem(ClusterMarker(51.490, -0.196, "h1", "idk"))
+        mClusterManager.addItem(ClusterMarker(51.491, -0.196, "h1", "idk"))
+        mClusterManager.addItem(ClusterMarker(51.492, -0.196, "h1", "idk"))
+        mClusterManager.addItem(ClusterMarker(51.493, -0.196, "h1", "idk"))
+        mClusterManager.addItem(ClusterMarker(51.494, -0.196, "h1", "idk"))
+        mClusterManager.addItem(ClusterMarker(51.495, -0.196, "h1", "idk"))
     }
 }
