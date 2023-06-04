@@ -5,14 +5,17 @@ import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.maps.android.clustering.ClusterManager
 import retrofit2.Call
 import retrofit2.Callback
@@ -22,10 +25,15 @@ import uk.ac.ic.doc.aware.api.RetrofitClient
 import uk.ac.ic.doc.aware.models.ClusterMarker
 import uk.ac.ic.doc.aware.models.CustomClusterRenderer
 import uk.ac.ic.doc.aware.models.CustomInfoWindow
+import uk.ac.ic.doc.aware.models.Marker
 import uk.ac.ic.doc.aware.models.MarkerList
+import java.text.SimpleDateFormat
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.Date
+import java.util.Locale
 
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -38,15 +46,109 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
         findViewById<ImageButton>(R.id.refresh_button).setOnClickListener {
             Toast.makeText(this@MapActivity, "refreshing...", Toast.LENGTH_SHORT).show()
-            mClusterManager.clearItems()
-            mClusterManager.cluster()
-            getMarkers()
+            refreshMarkers()
         }
     }
 
+    private fun refreshMarkers() {
+        mClusterManager.clearItems()
+        mClusterManager.cluster()
+        getMarkers()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    @SuppressLint("PotentialBehaviorOverride")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         setUpClusterer()
+        mMap.setOnMapLongClickListener { location ->
+            val newMarker = mMap.addMarker(MarkerOptions().position(location).title("New Marker"))
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
+            mMap.setOnInfoWindowClickListener {
+                val alertDialogBuilder = AlertDialog.Builder(this)
+                val layout = layoutInflater.inflate(R.layout.new_marker_layout, null)
+                alertDialogBuilder.setView(layout)
+                val timeTextBox = layout.findViewById<TextView>(R.id.dateBox)
+                val sdf = SimpleDateFormat("HH:mm", Locale.UK)
+                timeTextBox.text = sdf.format(Date())
+                alertDialogBuilder.setTitle("New Marker")
+                    .setNegativeButton("Cancel") { _, _ -> newMarker?.remove() }
+                    .setPositiveButton("Post") { _, _ ->
+                        val priorityString =
+                            layout.findViewById<TextView>(R.id.priority).text.toString()
+                        if (priorityString.isEmpty()) {
+                            Toast.makeText(
+                                this@MapActivity,
+                                "Priority Level Empty!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            newMarker?.remove()
+                        } else {
+                            postMarker(
+                                location,
+                                layout.findViewById<TextView>(R.id.titleBox).text.toString(),
+                                layout.findViewById<TextView>(R.id.descriptionBox).text.toString(),
+                                priorityString.toInt(),
+                                timeTextBox.text.toString()
+                            )
+                            newMarker?.remove()
+                            refreshMarkers()
+                        }
+                    }
+                    .create().show()
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun postMarker(
+        location: LatLng,
+        title: String,
+        description: String,
+        priority: Int,
+        timeStamp: String
+    ) {
+        val retrofit = RetrofitClient.getInstance()
+        val apiInterface = retrofit.create(ApiInterface::class.java)
+        // 2023-06-04T11:04:41+01:00
+        // I HATE TIMEZONE LOCAL DATE SO MUCH PAIN
+        val timeNow =
+            LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).atZone(ZoneId.of("Europe/London"))
+                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        val firstSplit = timeNow.split("T")
+        val timeZone = firstSplit[1].split("+")[1]
+        val finalTime = firstSplit[0] + "T$timeStamp:00+" + timeZone
+
+        apiInterface.addMarker(
+            Marker(
+                id = null,
+                title = title,
+                description = description,
+                priority = priority,
+                date = finalTime,
+                lat = location.latitude,
+                lng = location.longitude
+            )
+        )
+            .enqueue(object : Callback<Marker> {
+                override fun onResponse(call: Call<Marker>, response: Response<Marker>) {
+                    if (response.code() == 500) {
+                        Toast.makeText(this@MapActivity, "POST request failed", Toast.LENGTH_SHORT)
+                            .show()
+                    } else {
+                        Toast.makeText(
+                            this@MapActivity,
+                            "Success",
+                            Toast.LENGTH_LONG
+                        )
+                            .show()
+                    }
+                }
+
+                override fun onFailure(call: Call<Marker>, t: Throwable) {
+                    Toast.makeText(this@MapActivity, t.message, Toast.LENGTH_LONG).show()
+                }
+            })
     }
 
     @SuppressLint("PotentialBehaviorOverride")
