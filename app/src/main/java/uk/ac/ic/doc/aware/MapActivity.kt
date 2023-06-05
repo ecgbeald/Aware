@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -17,6 +16,9 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.maps.android.clustering.ClusterManager
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -26,7 +28,6 @@ import uk.ac.ic.doc.aware.models.ClusterMarker
 import uk.ac.ic.doc.aware.models.CustomClusterRenderer
 import uk.ac.ic.doc.aware.models.CustomInfoWindow
 import uk.ac.ic.doc.aware.models.Marker
-import uk.ac.ic.doc.aware.models.MarkerList
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -34,27 +35,29 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var mClusterManager: ClusterManager<ClusterMarker>
+    private var currentMarkers: Set<Marker> = HashSet()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
         val mapFragment = supportFragmentManager.findFragmentById(R.id.maps) as SupportMapFragment
         mapFragment.getMapAsync(this)
-        findViewById<ImageButton>(R.id.refresh_button).setOnClickListener {
-            Toast.makeText(this@MapActivity, "refreshing...", Toast.LENGTH_SHORT).show()
-            refreshMarkers()
-        }
+//        rip refresh button, you were lovely
+//        findViewById<ImageButton>(R.id.refresh_button).setOnClickListener {
+//            Toast.makeText(this@MapActivity, "refreshing...", Toast.LENGTH_SHORT).show()
+//            refreshMarkers()
+//        }
     }
-
-    private fun refreshMarkers() {
-        mClusterManager.clearItems()
-        mClusterManager.cluster()
-        getMarkers()
-    }
+//    private fun refreshMarkers() {
+//        mClusterManager.clearItems()
+//        mClusterManager.cluster()
+//        getMarkers()
+//    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("PotentialBehaviorOverride")
@@ -92,7 +95,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                                 timeTextBox.text.toString()
                             )
                             newMarker?.remove()
-                            refreshMarkers()
                         }
                     }
                     .create().show()
@@ -187,38 +189,38 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         getMarkers()
     }
 
+    @SuppressLint("CheckResult")
     private fun getMarkers() {
         val retrofit = RetrofitClient.getInstance()
         val apiInterface = retrofit.create(ApiInterface::class.java)
-        apiInterface.getAllMarkers().enqueue(object : Callback<MarkerList> {
-            @RequiresApi(Build.VERSION_CODES.O)
-            override fun onResponse(call: Call<MarkerList>, response: Response<MarkerList>) {
-                val markersResp = response.body()?.markers!!
-                for (marker in markersResp) {
-                    val current = LocalDateTime.now()
-                    val convertDate =
-                        LocalDateTime.parse(marker.date!!, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-                    val minutes = ChronoUnit.MINUTES.between(convertDate, current)
-                    // TODO: need to redesign info window
-                    val description = marker.description!! + "\nAdded: " + minutes + " minutes ago"
-                    mClusterManager.addItem(
-                        ClusterMarker(
-                            marker.lat!!,
-                            marker.lng!!,
-                            marker.title!!,
-                            description,
-                            marker.priority!!
-                        )
-                    )
-                }
-                mClusterManager.cluster()
-            }
+        Observable.interval(0, 5, TimeUnit.SECONDS, Schedulers.io())
+            .flatMap { apiInterface.getMarkersObservable() }
+            .doOnError { i -> Toast.makeText(this, i.message, Toast.LENGTH_SHORT).show() }
+            .observeOn(AndroidSchedulers.mainThread()).map { i -> i.markers.toSet() }
+            .filter { i -> i != currentMarkers }.subscribe(this::handleResults)
+    }
 
-            override fun onFailure(call: Call<MarkerList>, t: Throwable) {
-                Toast.makeText(applicationContext, t.message, Toast.LENGTH_LONG).show()
-            }
-
-        })
+    private fun handleResults(markers: Set<Marker>) {
+//        Toast.makeText(this, markers.toString(), Toast.LENGTH_LONG).show()
+        currentMarkers = markers
+        mClusterManager.clearItems()
+        for (marker in currentMarkers) {
+            val currentTime = LocalDateTime.now()
+            val convertDate =
+                LocalDateTime.parse(marker.date, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+            val minuteDifference = ChronoUnit.MINUTES.between(convertDate, currentTime)
+            val description = marker.description + "\nAdded: $minuteDifference minutes ago."
+            mClusterManager.addItem(
+                ClusterMarker(
+                    marker.lat!!,
+                    marker.lng!!,
+                    marker.title!!,
+                    description,
+                    marker.priority!!
+                )
+            )
+        }
+        mClusterManager.cluster()
     }
 
     private fun debugAddItems() {
