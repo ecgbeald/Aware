@@ -2,7 +2,6 @@ package uk.ac.ic.doc.aware.models
 
 import android.content.Context
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.maps.android.clustering.ClusterManager
@@ -17,8 +16,15 @@ class CustomClusterRenderer(
 
     override fun onBeforeClusterItemRendered(marker: ClusterMarker, markerOptions: MarkerOptions) {
         // this bit sets the marker orange
-        val markerDescriptor: BitmapDescriptor =
-            BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)
+        val bdf: Float = when (marker.getPriority()) {
+            0 -> BitmapDescriptorFactory.HUE_ORANGE
+            1 -> BitmapDescriptorFactory.HUE_AZURE
+            2 -> BitmapDescriptorFactory.HUE_VIOLET
+            else -> {
+                BitmapDescriptorFactory.HUE_MAGENTA
+            }
+        }
+        val markerDescriptor = BitmapDescriptorFactory.defaultMarker(bdf)
         markerOptions.icon(markerDescriptor).title(marker.title)
         markerOptions.icon(markerDescriptor).snippet(marker.snippet)
     }

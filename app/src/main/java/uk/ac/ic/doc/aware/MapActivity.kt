@@ -96,6 +96,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                         }
                     }
                     .create().show()
+                mMap.setOnInfoWindowClickListener(null)
             }
         }
     }
@@ -200,13 +201,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                     val minutes = ChronoUnit.MINUTES.between(convertDate, current)
                     // TODO: need to redesign info window
                     val description = marker.description!! + "\nAdded: " + minutes + " minutes ago"
-                    println(description)
                     mClusterManager.addItem(
                         ClusterMarker(
                             marker.lat!!,
                             marker.lng!!,
                             marker.title!!,
-                            description
+                            description,
+                            marker.priority!!
                         )
                     )
                 }
@@ -222,11 +223,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun debugAddItems() {
         // only call this after cluster manager is initialised!
-        mClusterManager.addItem(ClusterMarker(51.490, -0.196, "h1", "idk"))
-        mClusterManager.addItem(ClusterMarker(51.491, -0.196, "h1", "idk"))
-        mClusterManager.addItem(ClusterMarker(51.492, -0.196, "h1", "idk"))
-        mClusterManager.addItem(ClusterMarker(51.493, -0.196, "h1", "idk"))
-        mClusterManager.addItem(ClusterMarker(51.494, -0.196, "h1", "idk"))
-        mClusterManager.addItem(ClusterMarker(51.495, -0.196, "h1", "idk"))
+        mClusterManager.addItem(ClusterMarker(51.490, -0.196, "h1", "idk", 0))
+        mClusterManager.addItem(ClusterMarker(51.491, -0.196, "h1", "idk", 1))
+        mClusterManager.addItem(ClusterMarker(51.492, -0.196, "h1", "idk", 2))
+        mClusterManager.addItem(ClusterMarker(51.493, -0.196, "h1", "idk", 0))
+        mClusterManager.addItem(ClusterMarker(51.494, -0.196, "h1", "idk", 1))
+        mClusterManager.addItem(ClusterMarker(51.495, -0.196, "h1", "idk", 2))
     }
 }
