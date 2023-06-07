@@ -2,10 +2,12 @@ package uk.ac.ic.doc.aware.models
 
 import android.content.Context
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
+import uk.ac.ic.doc.aware.R
 
 class CustomClusterRenderer(
     context: Context,
@@ -16,17 +18,15 @@ class CustomClusterRenderer(
 
     override fun onBeforeClusterItemRendered(marker: ClusterMarker, markerOptions: MarkerOptions) {
         // this bit sets the marker orange
-        val bdf: Float = when (marker.getPriority()) {
-            0 -> BitmapDescriptorFactory.HUE_ORANGE
-            1 -> BitmapDescriptorFactory.HUE_AZURE
-            2 -> BitmapDescriptorFactory.HUE_VIOLET
+        val bdf: BitmapDescriptor = when (marker.getPriority()) {
+            0 -> BitmapDescriptorFactory.fromResource(R.drawable.theft)
+            1 -> BitmapDescriptorFactory.fromResource(R.drawable.anti_social)
+            2 -> BitmapDescriptorFactory.fromResource(R.drawable.block)
             else -> {
-                BitmapDescriptorFactory.HUE_MAGENTA
+                BitmapDescriptorFactory.fromResource(R.drawable.major)
             }
         }
-        val markerDescriptor = BitmapDescriptorFactory.defaultMarker(bdf)
-        markerOptions.icon(markerDescriptor).title(marker.title)
-        markerOptions.icon(markerDescriptor).snippet(marker.snippet)
+        markerOptions.icon(bdf).title(marker.title).snippet(marker.snippet)
     }
 
 //    this is for customise cluster design, not sure if useful
