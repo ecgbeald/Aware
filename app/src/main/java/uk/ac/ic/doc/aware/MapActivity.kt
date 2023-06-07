@@ -10,26 +10,22 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.common.api.Status
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.maps.android.clustering.ClusterManager
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import uk.ac.ic.doc.aware.api.ApiInterface
 import uk.ac.ic.doc.aware.api.Client
-import uk.ac.ic.doc.aware.api.RetrofitClient
 import uk.ac.ic.doc.aware.models.ClusterMarker
 import uk.ac.ic.doc.aware.models.CustomClusterRenderer
 import uk.ac.ic.doc.aware.models.CustomInfoWindow
-import uk.ac.ic.doc.aware.models.Marker
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -44,19 +40,33 @@ import java.util.concurrent.TimeUnit
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var mClusterManager: ClusterManager<ClusterMarker>
-    private var currentMarkers: Set<Marker> = HashSet()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Client.mapActivity = this
         setContentView(R.layout.activity_map)
+        if (!Places.isInitialized()) {
+            Places.initialize(applicationContext, "AIzaSyDvDlocXrkrA5O7iHdN2JCrd2ynwZQXz0Y")
+        }
+        val autocompleteFragment = supportFragmentManager.findFragmentById(R.id.autocomplete_fragment) as AutocompleteSupportFragment
+        autocompleteFragment.setCountries("UK")
+        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG))
+        autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
+            override fun onError(p0: Status) {
+                Toast.makeText(this@MapActivity, "Search Bar error", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onPlaceSelected(place: Place) {
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.latLng!!, 15f))
+            }
+        })
         val mapFragment = supportFragmentManager.findFragmentById(R.id.maps) as SupportMapFragment
         mapFragment.getMapAsync(this)
-//        rip refresh button, you were lovely
         findViewById<ImageButton>(R.id.refresh_button).setOnClickListener {
             Toast.makeText(this@MapActivity, "refreshing...", Toast.LENGTH_SHORT).show()
             refreshMarkers()
         }
     }
+
     fun refreshMarkers() {
         mClusterManager.clearItems()
         mClusterManager.cluster()
@@ -119,8 +129,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         priority: Int,
         timeStamp: String
     ) {
-        val retrofit = RetrofitClient.getInstance()
-        val apiInterface = retrofit.create(ApiInterface::class.java)
         // 2023-06-04T11:04:41+01:00
         // I HATE TIMEZONE LOCAL DATE SO MUCH PAIN
         val timeNow =
@@ -148,7 +156,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             false
         }
         mClusterManager.setOnClusterItemClickListener {
-            Toast.makeText(this@MapActivity, "Cluster item click", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@MapActivity, "Cluster item ${it.getId()} clicked", Toast.LENGTH_SHORT).show()
             // if true, click handling stops here and do not show info view, do not move camera
             // you can avoid this by calling:
             // renderer.getMarker(clusterItem).showInfoWindow();
@@ -173,7 +181,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         val latch = CountDownLatch(1)
         Client.latch = latch
         Client.webSocket.send("get")
-        if (!latch.await(5,TimeUnit.SECONDS)) {
+        if (!latch.await(5, TimeUnit.SECONDS)) {
             println("Timeout")
         }
         for (marker in Client.data) {
@@ -196,7 +204,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         mClusterManager.cluster()
     }
 
-    fun delete(id: Int) {
+    private fun delete(id: Int) {
         Client.webSocket.send("delete<:>" + id.toString())
     }
 

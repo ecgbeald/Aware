@@ -54,7 +54,7 @@ object Client : WebSocketListener() {
     fun startClient() {
         val client = OkHttpClient()
         val request = Request.Builder()
-            .url("http://drp-aware.herokuapp.com")
+            .url("https://drp-aware.herokuapp.com")
             .build()
         webSocket = client.newWebSocket(request, Client)
 

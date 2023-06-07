@@ -9,6 +9,7 @@ class ClusterMarker(id: Int, lat: Double, lng: Double, title: String, snippet: S
     private val mTitle: String = title
     private val mSnippet: String = snippet
     private val mPriority: Int = priority
+    private val mId: Int = id
 
     init {
         mPosition = LatLng(lat, lng)
@@ -28,6 +29,10 @@ class ClusterMarker(id: Int, lat: Double, lng: Double, title: String, snippet: S
 
     fun getPriority(): Int {
         return mPriority
+    }
+
+    fun getId(): Int {
+        return mId
     }
 
     override fun getZIndex(): Float {
