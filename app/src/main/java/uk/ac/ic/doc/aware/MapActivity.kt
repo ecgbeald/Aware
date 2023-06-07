@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Spinner
 import android.widget.TextView
@@ -22,6 +23,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
@@ -86,7 +88,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         setUpClusterer()
-        var lastMarker: com.google.android.gms.maps.model.Marker? = null
+        var lastMarker: Marker? = null
         mMap.setOnMapLongClickListener { location ->
             lastMarker?.remove()
             val newMarker = mMap.addMarker(MarkerOptions().position(location).title("New Marker"))
@@ -123,7 +125,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                     spinner.adapter = adapter
                 }
                 alertDialogBuilder.setTitle("New Marker")
-                    .setNegativeButton("Cancel") { _, _ -> newMarker?.remove() }
+                    .setNegativeButton("Cancel") { _, _ -> }
                     .setPositiveButton("Post") { _, _ ->
                         postMarker(
                             location,
@@ -132,11 +134,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                             severity,
                             timeTextBox.text.toString()
                         )
-                        newMarker?.remove()
                         refreshMarkers()
                     }
                     .create().show()
-                mMap.setOnInfoWindowClickListener(null)
+                newMarker?.remove()
             }
         }
     }
@@ -169,18 +170,25 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         mClusterManager.renderer = CustomClusterRenderer(this, mMap, mClusterManager)
         mClusterManager.markerCollection
             .setInfoWindowAdapter(CustomInfoWindow(LayoutInflater.from(this)))
-//        mClusterManager.setOnClusterClickListener {
-//             click on a cluster of markers (not sure if it's useful
-//            Toast.makeText(this@MapActivity, "Cluster click", Toast.LENGTH_SHORT).show()
-//             if true, do not move camera
-//            false
-//        }
-        mClusterManager.setOnClusterItemClickListener {
+        mClusterManager.setOnClusterItemClickListener {item ->
             Toast.makeText(
                 this@MapActivity,
-                "Cluster item ${it.getId()} clicked",
+                "Cluster item ${item.getId()} clicked",
                 Toast.LENGTH_SHORT
             ).show()
+            mMap.setOnInfoWindowClickListener {
+                val alertDialogBuilder = AlertDialog.Builder(this)
+                val layout = layoutInflater.inflate(R.layout.new_marker_layout, null)
+                alertDialogBuilder.setView(layout)
+                layout.findViewById<EditText>(R.id.titleBox).setText(item.title)
+                layout.findViewById<EditText>(R.id.descriptionBox).setText(item.snippet)
+                alertDialogBuilder.setTitle("Change Marker")
+                    .setNegativeButton("Delete") { _, _ -> delete(item.getId())}
+                    .setPositiveButton("Change") { _, _ ->
+                        // TODO: PUT request to change content (maybe just delete is enough)
+                    }
+                    .create().show()
+            }
             // if true, click handling stops here and do not show info view, do not move camera
             // you can avoid this by calling:
             // renderer.getMarker(clusterItem).showInfoWindow();
@@ -246,14 +254,4 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             TimePickerDialog(this@MapActivity, onTimeSetListener, mHour, mMinute, true)
         timePickerDialog.show()
     }
-
-//    private fun debugAddItems() {
-//        // only call this after cluster manager is initialised!
-//        mClusterManager.addItem(ClusterMarker(51.490, -0.196, "h1", "idk", 0))
-//        mClusterManager.addItem(ClusterMarker(51.491, -0.196, "h1", "idk", 1))
-//        mClusterManager.addItem(ClusterMarker(51.492, -0.196, "h1", "idk", 2))
-//        mClusterManager.addItem(ClusterMarker(51.493, -0.196, "h1", "idk", 0))
-//        mClusterManager.addItem(ClusterMarker(51.494, -0.196, "h1", "idk", 1))
-//        mClusterManager.addItem(ClusterMarker(51.495, -0.196, "h1", "idk", 2))
-//    }
 }
