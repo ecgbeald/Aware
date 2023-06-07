@@ -5,8 +5,12 @@ import android.app.TimePickerDialog
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -96,29 +100,40 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 val sdf = SimpleDateFormat("HH:mm", Locale.UK)
                 timeTextBox.text = sdf.format(Date())
                 timeTextBox.setOnClickListener { popUpTimePicker(timeTextBox) }
+                val spinner: Spinner = layout.findViewById(R.id.severity)
+                var severity = 0
+                spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        severity = position
+                    }
+
+                    override fun onNothingSelected(parent: AdapterView<*>?) {}
+                }
+                ArrayAdapter.createFromResource(
+                    this,
+                    R.array.event_array,
+                    android.R.layout.simple_spinner_item
+                ).also { adapter ->
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    spinner.adapter = adapter
+                }
                 alertDialogBuilder.setTitle("New Marker")
                     .setNegativeButton("Cancel") { _, _ -> newMarker?.remove() }
                     .setPositiveButton("Post") { _, _ ->
-                        val priorityString =
-                            layout.findViewById<TextView>(R.id.priority).text.toString()
-                        if (priorityString.isEmpty()) {
-                            Toast.makeText(
-                                this@MapActivity,
-                                "Priority Level Empty!",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            newMarker?.remove()
-                        } else {
-                            postMarker(
-                                location,
-                                layout.findViewById<TextView>(R.id.titleBox).text.toString(),
-                                layout.findViewById<TextView>(R.id.descriptionBox).text.toString(),
-                                priorityString.toInt(),
-                                timeTextBox.text.toString()
-                            )
-                            newMarker?.remove()
-                            refreshMarkers()
-                        }
+                        postMarker(
+                            location,
+                            layout.findViewById<TextView>(R.id.titleBox).text.toString(),
+                            layout.findViewById<TextView>(R.id.descriptionBox).text.toString(),
+                            severity,
+                            timeTextBox.text.toString()
+                        )
+                        newMarker?.remove()
+                        refreshMarkers()
                     }
                     .create().show()
                 mMap.setOnInfoWindowClickListener(null)

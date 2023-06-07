@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Aware</string>
+    <string-array name="event_array">
+        <item>Theft</item>
+        <item>Anti Social</item>
+        <item>Road Closure</item>
+        <item>Major Incident</item>
+    </string-array>
 </resources>
