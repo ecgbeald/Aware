@@ -1,9 +1,11 @@
 package uk.ac.ic.doc.aware
 
 import android.annotation.SuppressLint
+import android.app.TimePickerDialog
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
@@ -31,6 +33,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.CountDownLatch
@@ -47,7 +50,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         if (!Places.isInitialized()) {
             Places.initialize(applicationContext, "AIzaSyDvDlocXrkrA5O7iHdN2JCrd2ynwZQXz0Y")
         }
-        val autocompleteFragment = supportFragmentManager.findFragmentById(R.id.autocomplete_fragment) as AutocompleteSupportFragment
+        val autocompleteFragment =
+            supportFragmentManager.findFragmentById(R.id.autocomplete_fragment) as AutocompleteSupportFragment
         autocompleteFragment.setCountries("UK")
         autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG))
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
@@ -88,9 +92,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 val alertDialogBuilder = AlertDialog.Builder(this)
                 val layout = layoutInflater.inflate(R.layout.new_marker_layout, null)
                 alertDialogBuilder.setView(layout)
-                val timeTextBox = layout.findViewById<TextView>(R.id.dateBox)
+                val timeTextBox = layout.findViewById<Button>(R.id.dateBox)
                 val sdf = SimpleDateFormat("HH:mm", Locale.UK)
                 timeTextBox.text = sdf.format(Date())
+                timeTextBox.setOnClickListener { popUpTimePicker(timeTextBox) }
                 alertDialogBuilder.setTitle("New Marker")
                     .setNegativeButton("Cancel") { _, _ -> newMarker?.remove() }
                     .setPositiveButton("Post") { _, _ ->
@@ -149,14 +154,18 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         mClusterManager.renderer = CustomClusterRenderer(this, mMap, mClusterManager)
         mClusterManager.markerCollection
             .setInfoWindowAdapter(CustomInfoWindow(LayoutInflater.from(this)))
-        mClusterManager.setOnClusterClickListener {
-            // click on a cluster of markers (not sure if it's useful
-            Toast.makeText(this@MapActivity, "Cluster click", Toast.LENGTH_SHORT).show()
-            // if true, do not move camera
-            false
-        }
+//        mClusterManager.setOnClusterClickListener {
+//             click on a cluster of markers (not sure if it's useful
+//            Toast.makeText(this@MapActivity, "Cluster click", Toast.LENGTH_SHORT).show()
+//             if true, do not move camera
+//            false
+//        }
         mClusterManager.setOnClusterItemClickListener {
-            Toast.makeText(this@MapActivity, "Cluster item ${it.getId()} clicked", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this@MapActivity,
+                "Cluster item ${it.getId()} clicked",
+                Toast.LENGTH_SHORT
+            ).show()
             // if true, click handling stops here and do not show info view, do not move camera
             // you can avoid this by calling:
             // renderer.getMarker(clusterItem).showInfoWindow();
@@ -206,6 +215,21 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun delete(id: Int) {
         Client.webSocket.send("delete<:>" + id.toString())
+    }
+
+    // for the cool clock widget thingy
+    private fun popUpTimePicker(timeButton: Button) {
+        val cal = Calendar.getInstance()
+        var mHour = cal.get(Calendar.HOUR_OF_DAY)
+        var mMinute = cal.get(Calendar.MINUTE)
+        val onTimeSetListener = TimePickerDialog.OnTimeSetListener { _, hour, minute ->
+            mHour = hour
+            mMinute = minute
+            timeButton.text = String.format(Locale.UK, "%02d:%02d", mHour, mMinute)
+        }
+        val timePickerDialog =
+            TimePickerDialog(this@MapActivity, onTimeSetListener, mHour, mMinute, true)
+        timePickerDialog.show()
     }
 
 //    private fun debugAddItems() {
