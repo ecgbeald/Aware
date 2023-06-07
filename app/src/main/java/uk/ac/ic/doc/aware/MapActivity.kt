@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -23,6 +24,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import uk.ac.ic.doc.aware.api.ApiInterface
+import uk.ac.ic.doc.aware.api.Client
 import uk.ac.ic.doc.aware.api.RetrofitClient
 import uk.ac.ic.doc.aware.models.ClusterMarker
 import uk.ac.ic.doc.aware.models.CustomClusterRenderer
@@ -35,6 +37,7 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 
@@ -44,28 +47,32 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private var currentMarkers: Set<Marker> = HashSet()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Client.mapActivity = this
         setContentView(R.layout.activity_map)
         val mapFragment = supportFragmentManager.findFragmentById(R.id.maps) as SupportMapFragment
         mapFragment.getMapAsync(this)
 //        rip refresh button, you were lovely
-//        findViewById<ImageButton>(R.id.refresh_button).setOnClickListener {
-//            Toast.makeText(this@MapActivity, "refreshing...", Toast.LENGTH_SHORT).show()
-//            refreshMarkers()
-//        }
+        findViewById<ImageButton>(R.id.refresh_button).setOnClickListener {
+            Toast.makeText(this@MapActivity, "refreshing...", Toast.LENGTH_SHORT).show()
+            refreshMarkers()
+        }
     }
-//    private fun refreshMarkers() {
-//        mClusterManager.clearItems()
-//        mClusterManager.cluster()
-//        getMarkers()
-//    }
+    fun refreshMarkers() {
+        mClusterManager.clearItems()
+        mClusterManager.cluster()
+        getMarkers()
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("PotentialBehaviorOverride")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         setUpClusterer()
+        var lastMarker: com.google.android.gms.maps.model.Marker? = null
         mMap.setOnMapLongClickListener { location ->
+            lastMarker?.remove()
             val newMarker = mMap.addMarker(MarkerOptions().position(location).title("New Marker"))
+            lastMarker = newMarker
             mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
             mMap.setOnInfoWindowClickListener {
                 val alertDialogBuilder = AlertDialog.Builder(this)
@@ -95,6 +102,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                                 timeTextBox.text.toString()
                             )
                             newMarker?.remove()
+                            refreshMarkers()
                         }
                     }
                     .create().show()
@@ -121,37 +129,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         val firstSplit = timeNow.split("T")
         val timeZone = firstSplit[1].split("+")[1]
         val finalTime = firstSplit[0] + "T$timeStamp:00+" + timeZone
+        Client.webSocket.send("add<:>" + title + "<:>" + description + "<:>" + location.latitude.toString() + "<:>" + location.longitude.toString() + "<:>" + priority.toString() + "<:>" + finalTime)
 
-        apiInterface.addMarker(
-            Marker(
-                id = null,
-                title = title,
-                description = description,
-                priority = priority,
-                date = finalTime,
-                lat = location.latitude,
-                lng = location.longitude
-            )
-        )
-            .enqueue(object : Callback<Marker> {
-                override fun onResponse(call: Call<Marker>, response: Response<Marker>) {
-                    if (response.code() == 500) {
-                        Toast.makeText(this@MapActivity, "POST request failed", Toast.LENGTH_SHORT)
-                            .show()
-                    } else {
-                        Toast.makeText(
-                            this@MapActivity,
-                            "Success",
-                            Toast.LENGTH_LONG
-                        )
-                            .show()
-                    }
-                }
-
-                override fun onFailure(call: Call<Marker>, t: Throwable) {
-                    Toast.makeText(this@MapActivity, t.message, Toast.LENGTH_LONG).show()
-                }
-            })
     }
 
     @SuppressLint("PotentialBehaviorOverride")
@@ -191,20 +170,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     @SuppressLint("CheckResult")
     private fun getMarkers() {
-        val retrofit = RetrofitClient.getInstance()
-        val apiInterface = retrofit.create(ApiInterface::class.java)
-        Observable.interval(0, 5, TimeUnit.SECONDS, Schedulers.io())
-            .flatMap { apiInterface.getMarkersObservable() }
-            .doOnError { i -> Toast.makeText(this, i.message, Toast.LENGTH_SHORT).show() }
-            .observeOn(AndroidSchedulers.mainThread()).map { i -> i.markers.toSet() }
-            .filter { i -> i != currentMarkers }.subscribe(this::handleResults)
-    }
-
-    private fun handleResults(markers: Set<Marker>) {
-//        Toast.makeText(this, markers.toString(), Toast.LENGTH_LONG).show()
-        currentMarkers = markers
-        mClusterManager.clearItems()
-        for (marker in currentMarkers) {
+        val latch = CountDownLatch(1)
+        Client.latch = latch
+        Client.webSocket.send("get")
+        if (!latch.await(5,TimeUnit.SECONDS)) {
+            println("Timeout")
+        }
+        for (marker in Client.data) {
             val currentTime = LocalDateTime.now()
             val convertDate =
                 LocalDateTime.parse(marker.date, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
@@ -212,24 +184,29 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             val description = marker.description + "\nAdded: $minuteDifference minutes ago."
             mClusterManager.addItem(
                 ClusterMarker(
-                    marker.lat!!,
-                    marker.lng!!,
-                    marker.title!!,
+                    marker.id,
+                    marker.lat,
+                    marker.lng,
+                    marker.title,
                     description,
-                    marker.priority!!
+                    marker.severity
                 )
             )
         }
         mClusterManager.cluster()
     }
 
-    private fun debugAddItems() {
-        // only call this after cluster manager is initialised!
-        mClusterManager.addItem(ClusterMarker(51.490, -0.196, "h1", "idk", 0))
-        mClusterManager.addItem(ClusterMarker(51.491, -0.196, "h1", "idk", 1))
-        mClusterManager.addItem(ClusterMarker(51.492, -0.196, "h1", "idk", 2))
-        mClusterManager.addItem(ClusterMarker(51.493, -0.196, "h1", "idk", 0))
-        mClusterManager.addItem(ClusterMarker(51.494, -0.196, "h1", "idk", 1))
-        mClusterManager.addItem(ClusterMarker(51.495, -0.196, "h1", "idk", 2))
+    fun delete(id: Int) {
+        Client.webSocket.send("delete<:>" + id.toString())
     }
+
+//    private fun debugAddItems() {
+//        // only call this after cluster manager is initialised!
+//        mClusterManager.addItem(ClusterMarker(51.490, -0.196, "h1", "idk", 0))
+//        mClusterManager.addItem(ClusterMarker(51.491, -0.196, "h1", "idk", 1))
+//        mClusterManager.addItem(ClusterMarker(51.492, -0.196, "h1", "idk", 2))
+//        mClusterManager.addItem(ClusterMarker(51.493, -0.196, "h1", "idk", 0))
+//        mClusterManager.addItem(ClusterMarker(51.494, -0.196, "h1", "idk", 1))
+//        mClusterManager.addItem(ClusterMarker(51.495, -0.196, "h1", "idk", 2))
+//    }
 }

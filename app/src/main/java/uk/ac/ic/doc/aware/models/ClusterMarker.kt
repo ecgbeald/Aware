@@ -3,7 +3,7 @@ package uk.ac.ic.doc.aware.models
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.clustering.ClusterItem
 
-class ClusterMarker(lat: Double, lng: Double, title: String, snippet: String, priority: Int) :
+class ClusterMarker(id: Int, lat: Double, lng: Double, title: String, snippet: String, priority: Int) :
     ClusterItem {
     private val mPosition: LatLng
     private val mTitle: String = title
