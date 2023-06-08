@@ -23,6 +23,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.Places
@@ -49,6 +50,8 @@ import java.util.concurrent.TimeUnit
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var mClusterManager: ClusterManager<ClusterMarker>
+
+    private val london = LatLngBounds(LatLng(51.463758, -0.237632), LatLng(51.5478144, -0.0527049))
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Client.mapActivity = this
@@ -87,6 +90,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     @SuppressLint("PotentialBehaviorOverride")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        mMap.setLatLngBoundsForCameraTarget(london)
         setUpClusterer()
         var lastMarker: Marker? = null
         mMap.setOnMapLongClickListener { location ->
@@ -185,6 +189,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 alertDialogBuilder.setView(layout)
                 layout.findViewById<EditText>(R.id.titleBox).setText(item.title)
                 layout.findViewById<EditText>(R.id.descriptionBox).setText(item.snippet)
+                layout.findViewById<EditText>(R.id.timeout).setText(item.getTimeout().toString())
                 alertDialogBuilder.setTitle("Change Marker")
                     .setNegativeButton("Delete") { _, _ -> delete(item.getId())}
                     .setPositiveButton("Change") { _, _ ->
@@ -232,7 +237,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                     marker.lng,
                     marker.title,
                     description,
-                    marker.severity
+                    marker.severity,
+                    marker.timeout
                 )
             )
         }
@@ -240,7 +246,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun delete(id: Int) {
-        Client.webSocket.send("delete<:>" + id.toString())
+        Client.webSocket.send("delete<:>$id")
     }
 
     // for the cool clock widget thingy
