@@ -133,6 +133,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                             layout.findViewById<TextView>(R.id.descriptionBox).text.toString(),
                             severity,
                             timeTextBox.text.toString()
+                            //have unit and number textboxes for timeout, calculate number of minutes
                         )
                         refreshMarkers()
                     }
@@ -148,7 +149,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         title: String,
         description: String,
         priority: Int,
-        timeStamp: String
+        timeStamp: String,
+        timeOut: Int
     ) {
         // 2023-06-04T11:04:41+01:00
         // I HATE TIMEZONE LOCAL DATE SO MUCH PAIN
@@ -158,8 +160,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         val firstSplit = timeNow.split("T")
         val timeZone = firstSplit[1].split("+")[1]
         val finalTime = firstSplit[0] + "T$timeStamp:00+" + timeZone
-        Client.webSocket.send("add<:>" + title + "<:>" + description + "<:>" + location.latitude.toString() + "<:>" + location.longitude.toString() + "<:>" + priority.toString() + "<:>" + finalTime)
-
+        Client.webSocket.send("add<:>" + title + "<:>" + description + "<:>" + location.latitude.toString() + "<:>" + location.longitude.toString() + "<:>" + priority.toString() + "<:>" + finalTime + "<:>" + timeOut.toString())
+        println(finalTime)
     }
 
     @SuppressLint("PotentialBehaviorOverride")

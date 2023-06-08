@@ -23,11 +23,9 @@ object Client : WebSocketListener() {
     override fun onMessage(webSocket: WebSocket, text: String) {
         println("Received message: $text")
         if (text.equals("refresh")) {
-            println("GOT REFRESH MESSSAGE FROM CLIENT 1")
             mapActivity.runOnUiThread {
                 mapActivity.refreshMarkers()
             }
-            webSocket.send("got refresh")
         } else {
             toArrayList(text)
             latch.countDown()
@@ -70,7 +68,8 @@ object Client : WebSocketListener() {
         val lat: Double,
         val lng: Double, // Use 'Any' if 'lng' can be either Double or String
         val severity: Int,
-        val date: String
+        val date: String,
+        val timeout: Int
     )
 
     fun toArrayList(s: String) {
