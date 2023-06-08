@@ -132,7 +132,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                             layout.findViewById<TextView>(R.id.titleBox).text.toString(),
                             layout.findViewById<TextView>(R.id.descriptionBox).text.toString(),
                             severity,
-                            timeTextBox.text.toString()
+                            timeTextBox.text.toString(),
+                            layout.findViewById<TextView>(R.id.timeout).text.toString().toInt()
                             //have unit and number textboxes for timeout, calculate number of minutes
                         )
                         refreshMarkers()

@@ -76,5 +76,13 @@
         android:layout_gravity="end"
         android:id="@+id/severity"/>
 
+    <EditText
+        android:id="@+id/timeout"
+        android:layout_width="wrap_content"
+        android:inputType="number"
+        android:layout_below="@id/textView3"
+        android:layout_height="wrap_content"
+        android:hint="Timeout" />
+
 
 </RelativeLayout>
