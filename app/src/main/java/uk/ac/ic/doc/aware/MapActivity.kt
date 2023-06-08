@@ -188,7 +188,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 val layout = layoutInflater.inflate(R.layout.new_marker_layout, null)
                 alertDialogBuilder.setView(layout)
                 layout.findViewById<EditText>(R.id.titleBox).setText(item.title)
-                layout.findViewById<EditText>(R.id.descriptionBox).setText(item.snippet)
+                // remove "added ... ago" line
+                var snippet = item.snippet
+                if (snippet.lastIndexOf("\n") > 0) {
+                    snippet = snippet.substring(0, snippet.lastIndexOf("\n"))
+                }
+                layout.findViewById<EditText>(R.id.descriptionBox).setText(snippet)
                 layout.findViewById<EditText>(R.id.timeout).setText(item.getTimeout().toString())
                 alertDialogBuilder.setTitle("Change Marker")
                     .setNegativeButton("Delete") { _, _ -> delete(item.getId())}
