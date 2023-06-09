@@ -134,7 +134,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                             0 -> 1
                             1 -> 60
                             2 -> 1440
-                            else -> {1}
+                            else -> { 1 }
                         }
                     }
 
@@ -167,7 +167,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                             layout.findViewById<TextView>(R.id.descriptionBox).text.toString(),
                             severity,
                             timeTextBox.text.toString(),
-                            layout.findViewById<TextView>(R.id.timeout).text.toString().toInt() * timeUnit
+                            layout.findViewById<TextView>(R.id.timeout).text.toString()
+                                .toInt() * timeUnit
                             //have unit and number textboxes for timeout, calculate number of minutes
                         )
                         refreshMarkers()
@@ -207,7 +208,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         mClusterManager.renderer = CustomClusterRenderer(this, mMap, mClusterManager)
         mClusterManager.markerCollection
             .setInfoWindowAdapter(CustomInfoWindow(LayoutInflater.from(this)))
-        mClusterManager.setOnClusterItemClickListener {item ->
+        mClusterManager.setOnClusterItemClickListener { item ->
             Toast.makeText(
                 this@MapActivity,
                 "Cluster item ${item.getId()} clicked",
@@ -218,15 +219,19 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 val layout = layoutInflater.inflate(R.layout.new_marker_layout, null)
                 alertDialogBuilder.setView(layout)
                 layout.findViewById<EditText>(R.id.titleBox).setText(item.title)
-                // remove "added ... ago" line
+                // remove "added ... ago" line and the timeout line
+                // ugly but it works eh
                 var snippet = item.snippet
+                if (snippet.lastIndexOf("\n") > 0) {
+                    snippet = snippet.substring(0, snippet.lastIndexOf("\n"))
+                }
                 if (snippet.lastIndexOf("\n") > 0) {
                     snippet = snippet.substring(0, snippet.lastIndexOf("\n"))
                 }
                 layout.findViewById<EditText>(R.id.descriptionBox).setText(snippet)
                 layout.findViewById<EditText>(R.id.timeout).setText(item.getTimeout().toString())
                 alertDialogBuilder.setTitle("Change Marker")
-                    .setNegativeButton("Delete") { _, _ -> delete(item.getId())}
+                    .setNegativeButton("Delete") { _, _ -> delete(item.getId()) }
                     .setPositiveButton("Change") { _, _ ->
                         // TODO: PUT request to change content (maybe just delete is enough)
                     }
@@ -253,7 +258,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun minuteDifferenceConverter(minute: Long): String {
         return if (minute in 60..1439) {
-            (minute / 60).toString() +  " hours"
+            (minute / 60).toString() + " hours"
         } else if (minute > 1440) {
             (minute / 1440).toString() + " days"
         } else {
@@ -274,7 +279,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             val convertDate =
                 LocalDateTime.parse(marker.date, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
             val minuteDifference = ChronoUnit.MINUTES.between(convertDate, currentTime)
-            val description = marker.description + "\nAdded: ${minuteDifferenceConverter(minuteDifference)} ago."
+            val description =
+                marker.description + "\nAdded ${minuteDifferenceConverter(minuteDifference)} ago\nExpiring in ${
+                    minuteDifferenceConverter(marker.timeout.toLong())
+                }"
             mClusterManager.addItem(
                 ClusterMarker(
                     marker.id,
