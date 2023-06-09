@@ -106,9 +106,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 val sdf = SimpleDateFormat("HH:mm", Locale.UK)
                 timeTextBox.text = sdf.format(Date())
                 timeTextBox.setOnClickListener { popUpTimePicker(timeTextBox) }
-                val spinner: Spinner = layout.findViewById(R.id.severity)
+                val severitySpinner: Spinner = layout.findViewById(R.id.severity)
+                val timeSpinner: Spinner = layout.findViewById(R.id.timeSpinner)
                 var severity = 0
-                spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                // based on minutes
+                var timeUnit = 1
+                severitySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                     override fun onItemSelected(
                         parent: AdapterView<*>?,
                         view: View?,
@@ -120,13 +123,40 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
                     override fun onNothingSelected(parent: AdapterView<*>?) {}
                 }
+                timeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        timeUnit = when (position) {
+                            0 -> 1
+                            1 -> 60
+                            2 -> 1440
+                            else -> {1}
+                        }
+                    }
+
+                    override fun onNothingSelected(parent: AdapterView<*>?) {
+                    }
+
+                }
                 ArrayAdapter.createFromResource(
                     this,
                     R.array.event_array,
                     android.R.layout.simple_spinner_item
                 ).also { adapter ->
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    spinner.adapter = adapter
+                    severitySpinner.adapter = adapter
+                }
+                ArrayAdapter.createFromResource(
+                    this,
+                    R.array.time,
+                    android.R.layout.simple_spinner_item
+                ).also { adapter ->
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    timeSpinner.adapter = adapter
                 }
                 alertDialogBuilder.setTitle("New Marker")
                     .setNegativeButton("Cancel") { _, _ -> }
@@ -137,7 +167,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                             layout.findViewById<TextView>(R.id.descriptionBox).text.toString(),
                             severity,
                             timeTextBox.text.toString(),
-                            layout.findViewById<TextView>(R.id.timeout).text.toString().toInt()
+                            layout.findViewById<TextView>(R.id.timeout).text.toString().toInt() * timeUnit
                             //have unit and number textboxes for timeout, calculate number of minutes
                         )
                         refreshMarkers()
@@ -221,6 +251,16 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         getMarkers()
     }
 
+    private fun minuteDifferenceConverter(minute: Long): String {
+        return if (minute in 60..1439) {
+            (minute / 60).toString() +  " hours"
+        } else if (minute > 1440) {
+            (minute / 1440).toString() + " days"
+        } else {
+            "$minute minutes"
+        }
+    }
+
     @SuppressLint("CheckResult")
     private fun getMarkers() {
         val latch = CountDownLatch(1)
@@ -234,7 +274,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             val convertDate =
                 LocalDateTime.parse(marker.date, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
             val minuteDifference = ChronoUnit.MINUTES.between(convertDate, currentTime)
-            val description = marker.description + "\nAdded: $minuteDifference minutes ago."
+            val description = marker.description + "\nAdded: ${minuteDifferenceConverter(minuteDifference)} ago."
             mClusterManager.addItem(
                 ClusterMarker(
                     marker.id,

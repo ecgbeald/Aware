@@ -84,5 +84,14 @@
         android:layout_height="wrap_content"
         android:hint="Timeout" />
 
+    <Spinner
+        android:layout_width="144dp"
+        android:layout_height="44dp"
+        android:layout_below="@+id/severity"
+        android:layout_gravity="end"
+        android:layout_toEndOf="@+id/timeout"
+        android:id="@+id/timeSpinner"
+        android:textSize="18sp" />
+
 
 </RelativeLayout>
