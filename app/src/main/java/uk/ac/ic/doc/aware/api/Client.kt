@@ -6,12 +6,14 @@ import okhttp3.*
 import okio.ByteString
 import uk.ac.ic.doc.aware.MapActivity
 import java.util.concurrent.CountDownLatch
+import kotlin.properties.Delegates
 
 object Client : WebSocketListener() {
     lateinit var latch: CountDownLatch
     lateinit var webSocket: WebSocket
     lateinit var data: List<MyData>
     lateinit var mapActivity: MapActivity
+    var isLoggedIn by Delegates.notNull<Boolean>()
 
     fun isDataInitialized() = ::data.isInitialized
 
@@ -22,11 +24,18 @@ object Client : WebSocketListener() {
 
     override fun onMessage(webSocket: WebSocket, text: String) {
         println("Received message: $text")
-        if (text.equals("refresh")) {
+        if (text == "refresh") {
             mapActivity.runOnUiThread {
                 mapActivity.refreshMarkers()
             }
-        } else {
+        } else if (text == "true") {
+            isLoggedIn = true
+            latch.countDown()
+        } else if (text == "false") {
+            isLoggedIn = false
+            latch.countDown()
+        }
+        else {
             toArrayList(text)
             latch.countDown()
         }

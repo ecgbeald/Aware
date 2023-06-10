@@ -14,9 +14,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Aware"
         tools:targetApi="31">
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDvDlocXrkrA5O7iHdN2JCrd2ynwZQXz0Y"/>
+            android:value="AIzaSyDvDlocXrkrA5O7iHdN2JCrd2ynwZQXz0Y" />
+
         <activity
             android:name=".MapActivity"
             android:exported="false" />
