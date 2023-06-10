@@ -62,7 +62,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         val autocompleteFragment =
             supportFragmentManager.findFragmentById(R.id.autocomplete_fragment) as AutocompleteSupportFragment
         autocompleteFragment.setCountries("UK")
-        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG))
+        autocompleteFragment.setPlaceFields(
+            listOf(
+                Place.Field.ID,
+                Place.Field.NAME,
+                Place.Field.LAT_LNG
+            )
+        )
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onError(p0: Status) {
                 Toast.makeText(this@MapActivity, "Search Bar error", Toast.LENGTH_SHORT).show()
@@ -93,88 +99,95 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.setLatLngBoundsForCameraTarget(london)
         setUpClusterer()
         var lastMarker: Marker? = null
-        mMap.setOnMapLongClickListener { location ->
-            lastMarker?.remove()
-            val newMarker = mMap.addMarker(MarkerOptions().position(location).title("New Marker"))
-            lastMarker = newMarker
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
-            mMap.setOnInfoWindowClickListener {
-                val alertDialogBuilder = AlertDialog.Builder(this)
-                val layout = layoutInflater.inflate(R.layout.new_marker_layout, null)
-                alertDialogBuilder.setView(layout)
-                val timeTextBox = layout.findViewById<Button>(R.id.dateBox)
-                val sdf = SimpleDateFormat("HH:mm", Locale.UK)
-                timeTextBox.text = sdf.format(Date())
-                timeTextBox.setOnClickListener { popUpTimePicker(timeTextBox) }
-                val severitySpinner: Spinner = layout.findViewById(R.id.severity)
-                val timeSpinner: Spinner = layout.findViewById(R.id.timeSpinner)
-                var severity = 0
-                // based on minutes
-                var timeUnit = 1
-                severitySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
-                        severity = position
-                    }
+        if (Client.isLoggedIn) {
+            mMap.setOnMapLongClickListener { location ->
+                lastMarker?.remove()
+                val newMarker =
+                    mMap.addMarker(MarkerOptions().position(location).title("New Marker"))
+                lastMarker = newMarker
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
+                mMap.setOnInfoWindowClickListener {
+                    val alertDialogBuilder = AlertDialog.Builder(this)
+                    val layout = layoutInflater.inflate(R.layout.new_marker_layout, null)
+                    alertDialogBuilder.setView(layout)
+                    val timeTextBox = layout.findViewById<Button>(R.id.dateBox)
+                    val sdf = SimpleDateFormat("HH:mm", Locale.UK)
+                    timeTextBox.text = sdf.format(Date())
+                    timeTextBox.setOnClickListener { popUpTimePicker(timeTextBox) }
+                    val severitySpinner: Spinner = layout.findViewById(R.id.severity)
+                    val timeSpinner: Spinner = layout.findViewById(R.id.timeSpinner)
+                    var severity = 0
+                    // based on minutes
+                    var timeUnit = 1
+                    severitySpinner.onItemSelectedListener =
+                        object : AdapterView.OnItemSelectedListener {
+                            override fun onItemSelected(
+                                parent: AdapterView<*>?,
+                                view: View?,
+                                position: Int,
+                                id: Long
+                            ) {
+                                severity = position
+                            }
 
-                    override fun onNothingSelected(parent: AdapterView<*>?) {}
-                }
-                timeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
-                        timeUnit = when (position) {
-                            0 -> 1
-                            1 -> 60
-                            2 -> 1440
-                            else -> { 1 }
+                            override fun onNothingSelected(parent: AdapterView<*>?) {}
                         }
-                    }
+                    timeSpinner.onItemSelectedListener =
+                        object : AdapterView.OnItemSelectedListener {
+                            override fun onItemSelected(
+                                parent: AdapterView<*>?,
+                                view: View?,
+                                position: Int,
+                                id: Long
+                            ) {
+                                timeUnit = when (position) {
+                                    0 -> 1
+                                    1 -> 60
+                                    2 -> 1440
+                                    else -> {
+                                        1
+                                    }
+                                }
+                            }
 
-                    override fun onNothingSelected(parent: AdapterView<*>?) {
-                    }
+                            override fun onNothingSelected(parent: AdapterView<*>?) {
+                            }
 
-                }
-                ArrayAdapter.createFromResource(
-                    this,
-                    R.array.event_array,
-                    android.R.layout.simple_spinner_item
-                ).also { adapter ->
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    severitySpinner.adapter = adapter
-                }
-                ArrayAdapter.createFromResource(
-                    this,
-                    R.array.time,
-                    android.R.layout.simple_spinner_item
-                ).also { adapter ->
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    timeSpinner.adapter = adapter
-                }
-                alertDialogBuilder.setTitle("New Marker")
-                    .setNegativeButton("Cancel") { _, _ -> }
-                    .setPositiveButton("Post") { _, _ ->
-                        postMarker(
-                            location,
-                            layout.findViewById<TextView>(R.id.titleBox).text.toString(),
-                            layout.findViewById<TextView>(R.id.descriptionBox).text.toString(),
-                            severity,
-                            timeTextBox.text.toString(),
-                            layout.findViewById<TextView>(R.id.timeout).text.toString()
-                                .toInt() * timeUnit
-                            //have unit and number textboxes for timeout, calculate number of minutes
-                        )
-                        refreshMarkers()
+                        }
+                    ArrayAdapter.createFromResource(
+                        this,
+                        R.array.event_array,
+                        android.R.layout.simple_spinner_item
+                    ).also { adapter ->
+                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                        severitySpinner.adapter = adapter
                     }
-                    .create().show()
-                newMarker?.remove()
+                    ArrayAdapter.createFromResource(
+                        this,
+                        R.array.time,
+                        android.R.layout.simple_spinner_item
+                    ).also { adapter ->
+                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                        timeSpinner.adapter = adapter
+                    }
+                    alertDialogBuilder.setTitle("New Marker")
+                        .setNegativeButton("Cancel") { _, _ -> }
+                        .setPositiveButton("Post") { _, _ ->
+                            postMarker(
+                                location,
+                                layout.findViewById<TextView>(R.id.titleBox).text.toString(),
+                                layout.findViewById<TextView>(R.id.descriptionBox).text.toString(),
+                                severity,
+                                timeTextBox.text.toString(),
+                                layout.findViewById<TextView>(R.id.timeout).text.toString()
+                                    .toInt() * timeUnit
+                                //have unit and number textboxes for timeout, calculate number of minutes
+                            )
+                            refreshMarkers()
+                        }
+                        .create().show()
+                    newMarker?.remove()
+                }
             }
         }
     }
@@ -214,28 +227,31 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 "Cluster item ${item.getId()} clicked",
                 Toast.LENGTH_SHORT
             ).show()
-            mMap.setOnInfoWindowClickListener {
-                val alertDialogBuilder = AlertDialog.Builder(this)
-                val layout = layoutInflater.inflate(R.layout.new_marker_layout, null)
-                alertDialogBuilder.setView(layout)
-                layout.findViewById<EditText>(R.id.titleBox).setText(item.title)
-                // remove "added ... ago" line and the timeout line
-                // ugly but it works eh
-                var snippet = item.snippet
-                if (snippet.lastIndexOf("\n") > 0) {
-                    snippet = snippet.substring(0, snippet.lastIndexOf("\n"))
-                }
-                if (snippet.lastIndexOf("\n") > 0) {
-                    snippet = snippet.substring(0, snippet.lastIndexOf("\n"))
-                }
-                layout.findViewById<EditText>(R.id.descriptionBox).setText(snippet)
-                layout.findViewById<EditText>(R.id.timeout).setText(item.getTimeout().toString())
-                alertDialogBuilder.setTitle("Change Marker")
-                    .setNegativeButton("Delete") { _, _ -> delete(item.getId()) }
-                    .setPositiveButton("Change") { _, _ ->
-                        // TODO: PUT request to change content (maybe just delete is enough)
+            if (Client.isLoggedIn) {
+                mMap.setOnInfoWindowClickListener {
+                    val alertDialogBuilder = AlertDialog.Builder(this)
+                    val layout = layoutInflater.inflate(R.layout.new_marker_layout, null)
+                    alertDialogBuilder.setView(layout)
+                    layout.findViewById<EditText>(R.id.titleBox).setText(item.title)
+                    // remove "added ... ago" line and the timeout line
+                    // ugly but it works eh
+                    var snippet = item.snippet
+                    if (snippet.lastIndexOf("\n") > 0) {
+                        snippet = snippet.substring(0, snippet.lastIndexOf("\n"))
                     }
-                    .create().show()
+                    if (snippet.lastIndexOf("\n") > 0) {
+                        snippet = snippet.substring(0, snippet.lastIndexOf("\n"))
+                    }
+                    layout.findViewById<EditText>(R.id.descriptionBox).setText(snippet)
+                    layout.findViewById<EditText>(R.id.timeout)
+                        .setText(item.getTimeout().toString())
+                    alertDialogBuilder.setTitle("Change Marker")
+                        .setNegativeButton("Delete") { _, _ -> delete(item.getId()) }
+                        .setPositiveButton("Change") { _, _ ->
+                            // TODO: PUT request to change content (maybe just delete is enough)
+                        }
+                        .create().show()
+                }
             }
             // if true, click handling stops here and do not show info view, do not move camera
             // you can avoid this by calling:

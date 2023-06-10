@@ -15,6 +15,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.map.setOnClickListener {
+            Client.isLoggedIn = false
             val intent = Intent(this, MapActivity::class.java)
             startActivity(intent)
         }
