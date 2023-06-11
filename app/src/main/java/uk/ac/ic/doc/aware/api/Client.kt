@@ -14,6 +14,7 @@ object Client : WebSocketListener() {
     lateinit var data: List<MyData>
     lateinit var mapActivity: MapActivity
     var isLoggedIn by Delegates.notNull<Boolean>()
+    lateinit var salt: String
 
     fun isDataInitialized() = ::data.isInitialized
 
@@ -33,6 +34,10 @@ object Client : WebSocketListener() {
             latch.countDown()
         } else if (text == "false") {
             isLoggedIn = false
+            latch.countDown()
+        } else if (text.contains("salt ")) {
+            val res = text.split(" ")
+            this.salt = res[1]
             latch.countDown()
         }
         else {
