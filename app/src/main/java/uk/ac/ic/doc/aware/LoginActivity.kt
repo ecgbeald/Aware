@@ -25,6 +25,8 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this@LoginActivity, "Welcome: $username", Toast.LENGTH_SHORT).show()
                 val intent = Intent(this, MapActivity::class.java)
                 startActivity(intent)
+            } else {
+                Toast.makeText(this@LoginActivity, "Wrong username or password", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -45,29 +47,28 @@ class LoginActivity : AppCompatActivity() {
             Client.isLoggedIn = false
             println("Timeout")
         }
-        if (Client.salt.equals("false")) {
+        return if (Client.salt == "false") {
             Client.isLoggedIn = false
-            return Client.isLoggedIn
+            Client.isLoggedIn
         } else {
-            val latch = CountDownLatch(1)
-            Client.latch = latch
+            val mLatch = CountDownLatch(1)
+            Client.latch = mLatch
             val hashedPass = hashWithSalt(password,Client.salt)
             Client.webSocket.send("login<:>$username<:>$hashedPass")
-            if (!latch.await(5, TimeUnit.SECONDS)) {
+            if (!mLatch.await(5, TimeUnit.SECONDS)) {
                 Client.isLoggedIn = false
                 println("Timeout")
             }
-            return Client.isLoggedIn
+            Client.isLoggedIn
         }
     }
 
-    fun hashWithSalt(password: String, salt: String): String {
+    private fun hashWithSalt(password: String, salt: String): String {
         val messageDigest = MessageDigest.getInstance("SHA-256")
         val saltedPassword = password + salt
 
         val digest = messageDigest.digest(saltedPassword.toByteArray())
-        val hexString = digest.joinToString("") { "%02x".format(it) }
 
-        return hexString
+        return digest.joinToString("") { "%02x".format(it) }
     }
 }
