@@ -1,7 +1,9 @@
 package uk.ac.ic.doc.aware
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.TimePickerDialog
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -17,6 +19,9 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback
+import androidx.core.content.ContextCompat
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -35,6 +40,8 @@ import uk.ac.ic.doc.aware.api.Client
 import uk.ac.ic.doc.aware.models.ClusterMarker
 import uk.ac.ic.doc.aware.models.CustomClusterRenderer
 import uk.ac.ic.doc.aware.models.CustomInfoWindow
+import uk.ac.ic.doc.aware.models.PermissionUtils
+import uk.ac.ic.doc.aware.models.PermissionUtils.PermissionDeniedDialog.Companion.newInstance
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -47,9 +54,10 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 
-class MapActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermissionsResultCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var mClusterManager: ClusterManager<ClusterMarker>
+    private var permissionDenied = false
 
     private val london = LatLngBounds(LatLng(51.463758, -0.237632), LatLng(51.5478144, -0.0527049))
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,6 +94,84 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    private fun enableMyLocation() {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            mMap.isMyLocationEnabled = true
+            return
+        }
+        if (ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) ||
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        ) {
+            PermissionUtils.RationaleDialog.newInstance(LOCATION_PERMISSION_REQUEST_CODE, true)
+                .show(supportFragmentManager, "dialog")
+            return
+        }
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ),
+            LOCATION_PERMISSION_REQUEST_CODE
+        )
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+            return
+        }
+        if (PermissionUtils.isPermissionGranted(
+                permissions,
+                grantResults,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) ||
+            PermissionUtils.isPermissionGranted(
+                permissions,
+                grantResults,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        ) {
+            enableMyLocation()
+        } else {
+            permissionDenied = true
+        }
+    }
+
+    override fun onResumeFragments() {
+        super.onResumeFragments()
+        if (permissionDenied) {
+            showMissingPermissionError()
+            permissionDenied = false
+        }
+    }
+
+    private fun showMissingPermissionError() {
+        newInstance(true).show(supportFragmentManager, "dialog")
+    }
+
+    companion object {
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1
+    }
+
     fun refreshMarkers() {
         mClusterManager.clearItems()
         mClusterManager.cluster()
@@ -96,6 +182,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     @SuppressLint("PotentialBehaviorOverride")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        enableMyLocation()
         mMap.setLatLngBoundsForCameraTarget(london)
         setUpClusterer()
         var lastMarker: Marker? = null
