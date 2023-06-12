@@ -92,6 +92,35 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
             Toast.makeText(this@MapActivity, "refreshing...", Toast.LENGTH_SHORT).show()
             refreshMarkers()
         }
+        findViewById<ImageButton>(R.id.filter_button).setOnClickListener {
+            val listItems = arrayOf("Theft", "Anti Social", "Road Closure", "Major Incident")
+            val checkedItems = BooleanArray(listItems.size)
+            val selectedItems = mutableListOf<Int>()
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Filter Events")
+            builder.setMultiChoiceItems(listItems, checkedItems) { dialog, which, isChecked ->
+                checkedItems[which] = isChecked
+            }
+            builder.setCancelable(false)
+            builder.setPositiveButton("OK") { dialog, which ->
+                for (i in checkedItems.indices) {
+                    if (checkedItems[i]) {
+                        selectedItems += i
+                    }
+                }
+                println(selectedItems)
+            }
+            // use this to return to normal not filtered scenario
+            builder.setNeutralButton("UNSET") { dialog, which ->
+
+            }
+            // abort action, not sending anything to backend
+            builder.setNegativeButton("CANCEL") {_, _ -> }
+            Toast.makeText(this@MapActivity, "clicked", Toast.LENGTH_SHORT).show()
+            val alertDialog = builder.create()
+            alertDialog.show()
+
+        }
     }
 
     private fun enableMyLocation() {
