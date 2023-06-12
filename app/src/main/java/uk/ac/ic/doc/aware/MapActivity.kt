@@ -362,7 +362,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
     private fun minuteDifferenceConverter(minute: Long): String {
         return if (minute in 60..1439) {
             (minute / 60).toString() + " hours"
-        } else if (minute > 1440) {
+        } else if (minute >= 1440) {
             (minute / 1440).toString() + " days"
         } else {
             "$minute minutes"
