@@ -3,15 +3,9 @@ package uk.ac.ic.doc.aware
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.TimePickerDialog
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.IBinder
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.AdapterView
@@ -43,9 +37,7 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.gson.Gson
 import com.google.maps.android.clustering.ClusterManager
-import uk.ac.ic.doc.aware.api.Client
 import uk.ac.ic.doc.aware.api.NewClient
-import uk.ac.ic.doc.aware.api.WebSocketService
 import uk.ac.ic.doc.aware.models.ClusterMarker
 import uk.ac.ic.doc.aware.models.CustomClusterRenderer
 import uk.ac.ic.doc.aware.models.CustomInfoWindow
@@ -106,6 +98,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
         findViewById<ImageButton>(R.id.filter_button).setOnClickListener {
             val listItems = arrayOf("Theft", "Anti Social", "Road Closure", "Major Incident")
             val checkedItems = BooleanArray(listItems.size)
+            for (index in selectedItems) {
+                checkedItems[index] = true
+            }
             val builder = AlertDialog.Builder(this)
             builder.setTitle("Filter Events")
             builder.setMultiChoiceItems(listItems, checkedItems) { dialog, which, isChecked ->
@@ -120,7 +115,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                     }
                 }
                 refreshMarkers()
-                println(selectedItems)
             }
             // use this to return to normal not filtered scenario
             builder.setNeutralButton("UNSET") { dialog, which ->
@@ -128,7 +122,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
             }
             // abort action, not sending anything to backend
             builder.setNegativeButton("CANCEL") {_, _ -> }
-            Toast.makeText(this@MapActivity, "clicked", Toast.LENGTH_SHORT).show()
             val alertDialog = builder.create()
             alertDialog.show()
         }
