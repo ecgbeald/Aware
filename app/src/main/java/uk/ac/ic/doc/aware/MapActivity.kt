@@ -41,6 +41,7 @@ import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
+import com.google.gson.Gson
 import com.google.maps.android.clustering.ClusterManager
 import uk.ac.ic.doc.aware.api.Client
 import uk.ac.ic.doc.aware.api.NewClient
@@ -66,6 +67,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
     private lateinit var mMap: GoogleMap
     private lateinit var mClusterManager: ClusterManager<ClusterMarker>
     private var permissionDenied = false
+    private val selectedItems = mutableListOf<Int>()
 
     private val london = LatLngBounds(LatLng(51.463758, -0.237632), LatLng(51.5478144, -0.0527049))
 
@@ -104,7 +106,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
         findViewById<ImageButton>(R.id.filter_button).setOnClickListener {
             val listItems = arrayOf("Theft", "Anti Social", "Road Closure", "Major Incident")
             val checkedItems = BooleanArray(listItems.size)
-            val selectedItems = mutableListOf<Int>()
             val builder = AlertDialog.Builder(this)
             builder.setTitle("Filter Events")
             builder.setMultiChoiceItems(listItems, checkedItems) { dialog, which, isChecked ->
@@ -112,11 +113,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
             }
             builder.setCancelable(false)
             builder.setPositiveButton("OK") { dialog, which ->
+                selectedItems.clear()
                 for (i in checkedItems.indices) {
                     if (checkedItems[i]) {
                         selectedItems += i
                     }
                 }
+                refreshMarkers()
                 println(selectedItems)
             }
             // use this to return to normal not filtered scenario
@@ -128,7 +131,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
             Toast.makeText(this@MapActivity, "clicked", Toast.LENGTH_SHORT).show()
             val alertDialog = builder.create()
             alertDialog.show()
-
         }
     }
 
@@ -409,9 +411,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
 
     @SuppressLint("CheckResult")
     private fun getMarkers() {
+        val jsonFilters = Gson().toJson(selectedItems)
         val latch = CountDownLatch(1)
         NewClient.webSocketService.latch = latch
-        NewClient.webSocketService.webSocket.send("get")
+        NewClient.webSocketService.webSocket.send("get<:>$jsonFilters")
         if (!latch.await(5, TimeUnit.SECONDS)) {
             println("Timeout")
         }
