@@ -103,11 +103,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
             }
             val builder = AlertDialog.Builder(this)
             builder.setTitle("Filter Events")
-            builder.setMultiChoiceItems(listItems, checkedItems) { dialog, which, isChecked ->
+            builder.setMultiChoiceItems(listItems, checkedItems) { _, which, isChecked ->
                 checkedItems[which] = isChecked
             }
             builder.setCancelable(false)
-            builder.setPositiveButton("OK") { dialog, which ->
+            builder.setPositiveButton("OK") { _, _ ->
                 selectedItems.clear()
                 for (i in checkedItems.indices) {
                     if (checkedItems[i]) {
@@ -117,8 +117,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                 refreshMarkers()
             }
             // use this to return to normal not filtered scenario
-            builder.setNeutralButton("UNSET") { dialog, which ->
-
+            builder.setNeutralButton("UNSET") { _, _ ->
+                selectedItems.clear()
+                refreshMarkers()
             }
             // abort action, not sending anything to backend
             builder.setNegativeButton("CANCEL") {_, _ -> }
