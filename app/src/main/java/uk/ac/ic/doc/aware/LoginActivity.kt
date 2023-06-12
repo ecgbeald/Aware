@@ -1,10 +1,16 @@
 package uk.ac.ic.doc.aware
 
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.IBinder
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import uk.ac.ic.doc.aware.api.Client
+import uk.ac.ic.doc.aware.api.WebSocketService
 import uk.ac.ic.doc.aware.databinding.ActivityLoginBinding
 import java.security.MessageDigest
 import java.util.concurrent.CountDownLatch
@@ -13,6 +19,33 @@ import kotlin.random.Random
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
+
+    private lateinit var webSocketService: WebSocketService
+    private var isServiceBound = false
+    private val serviceConnection = object : ServiceConnection {
+
+        lateinit var mapActivity: MapActivity
+
+        override fun onNullBinding(name: ComponentName?) {
+            super.onNullBinding(name)
+            println("NO BINDER RECEIVED :(")
+        }
+
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            println("WebSocketService onServiceConnected called")
+            val binder = service as WebSocketService.LocalBinder
+            webSocketService = binder.getService()
+            isServiceBound = true
+
+            // You can now access the WebSocket service and use its methods or variables.
+            // For example, you can call webSocketService.sendMessage("Hello") to send a message.
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            isServiceBound = false
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
 //        sendRegRequest()
         super.onCreate(savedInstanceState)

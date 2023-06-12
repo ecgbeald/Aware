@@ -3,9 +3,15 @@ package uk.ac.ic.doc.aware
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.TimePickerDialog
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.AdapterView
@@ -37,6 +43,8 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.maps.android.clustering.ClusterManager
 import uk.ac.ic.doc.aware.api.Client
+import uk.ac.ic.doc.aware.api.NewClient
+import uk.ac.ic.doc.aware.api.WebSocketService
 import uk.ac.ic.doc.aware.models.ClusterMarker
 import uk.ac.ic.doc.aware.models.CustomClusterRenderer
 import uk.ac.ic.doc.aware.models.CustomInfoWindow
@@ -60,9 +68,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
     private var permissionDenied = false
 
     private val london = LatLngBounds(LatLng(51.463758, -0.237632), LatLng(51.5478144, -0.0527049))
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Client.mapActivity = this
+        NewClient.webSocketService.mapActivity = this
         setContentView(R.layout.activity_map)
         if (!Places.isInitialized()) {
             Places.initialize(applicationContext, "AIzaSyDvDlocXrkrA5O7iHdN2JCrd2ynwZQXz0Y")
@@ -186,7 +195,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
         mMap.setLatLngBoundsForCameraTarget(london)
         setUpClusterer()
         var lastMarker: Marker? = null
-        if (Client.isLoggedIn) {
+        if (NewClient.webSocketService.isLoggedIn) {
             mMap.setOnMapLongClickListener { location ->
                 lastMarker?.remove()
                 val newMarker =
@@ -276,7 +285,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                     newMarker?.remove()
                 }
             }
-        }
+       }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -296,7 +305,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
         val firstSplit = timeNow.split("T")
         val timeZone = firstSplit[1].split("+")[1]
         val finalTime = firstSplit[0] + "T$timeStamp:00+" + timeZone
-        Client.webSocket.send("add<:>" + title + "<:>" + description + "<:>" + location.latitude.toString() + "<:>" + location.longitude.toString() + "<:>" + priority.toString() + "<:>" + finalTime + "<:>" + timeOut.toString())
+        NewClient.webSocketService.webSocket.send("add<:>" + title + "<:>" + description + "<:>" + location.latitude.toString() + "<:>" + location.longitude.toString() + "<:>" + priority.toString() + "<:>" + finalTime + "<:>" + timeOut.toString())
         println(finalTime)
     }
 
@@ -314,7 +323,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                 "Cluster item ${item.getId()} clicked",
                 Toast.LENGTH_SHORT
             ).show()
-            if (Client.isLoggedIn) {
+            if (NewClient.webSocketService.isLoggedIn) {
                 mMap.setOnInfoWindowClickListener {
                     val alertDialogBuilder = AlertDialog.Builder(this)
                     val layout = layoutInflater.inflate(R.layout.new_marker_layout, null)
@@ -372,12 +381,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
     @SuppressLint("CheckResult")
     private fun getMarkers() {
         val latch = CountDownLatch(1)
-        Client.latch = latch
-        Client.webSocket.send("get")
+        NewClient.webSocketService.latch = latch
+        NewClient.webSocketService.webSocket.send("get")
         if (!latch.await(5, TimeUnit.SECONDS)) {
             println("Timeout")
         }
-        for (marker in Client.data) {
+        for (marker in NewClient.webSocketService.data) {
             val currentTime = LocalDateTime.now()
             val convertDate =
                 LocalDateTime.parse(marker.date, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
@@ -402,7 +411,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
     }
 
     private fun delete(id: Int) {
-        Client.webSocket.send("delete<:>$id")
+        NewClient.webSocketService.webSocket.send("delete<:>$id")
     }
 
     // for the cool clock widget thingy
