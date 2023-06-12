@@ -28,7 +28,7 @@ class WebSocketService: Service() {
     lateinit var latch: CountDownLatch
     lateinit var data: List<MyData>
     lateinit var mapActivity: MapActivity
-    var isLoggedIn = true
+    var isLoggedIn = false
     lateinit var salt: String
 
     fun isDataInitialized() = ::data.isInitialized
