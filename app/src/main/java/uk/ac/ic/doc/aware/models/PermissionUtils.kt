@@ -79,7 +79,7 @@ object PermissionUtils {
             finishActivity =
                 arguments?.getBoolean(ARGUMENT_FINISH_ACTIVITY) ?: false
             return AlertDialog.Builder(activity)
-                .setMessage("location permission denied")
+                .setMessage("Location permission denied")
                 .setPositiveButton(android.R.string.ok, null)
                 .create()
         }
@@ -88,7 +88,7 @@ object PermissionUtils {
             super.onDismiss(dialog)
             if (finishActivity) {
                 Toast.makeText(
-                    activity, "idk",
+                    activity, "Location permission not granted",
                     Toast.LENGTH_SHORT
                 ).show()
                 activity?.finish()
@@ -131,8 +131,8 @@ object PermissionUtils {
             finishActivity =
                 arguments?.getBoolean(ARGUMENT_FINISH_ACTIVITY) ?: false
             return AlertDialog.Builder(activity)
-                .setMessage("permission_rationale_location")
-                .setPositiveButton(android.R.string.ok) { dialog, which -> // After click on Ok, request the permission.
+                .setMessage("Location permission needed")
+                .setPositiveButton(android.R.string.ok) { _, _ -> // After click on Ok, request the permission.
                     ActivityCompat.requestPermissions(
                         requireActivity(),
                         arrayOf(
@@ -153,7 +153,7 @@ object PermissionUtils {
             if (finishActivity) {
                 Toast.makeText(
                     activity,
-                    "R.string.permission_required_toast",
+                    "Location permission is required",
                     Toast.LENGTH_SHORT
                 ).show()
                 activity?.finish()
