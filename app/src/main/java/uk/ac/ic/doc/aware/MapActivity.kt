@@ -34,6 +34,7 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.RectangularBounds
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.gson.Gson
@@ -63,6 +64,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
     private val selectedItems = mutableListOf(0, 1, 2, 3)
 
     private val london = LatLngBounds(LatLng(51.4035835, -0.3493669), LatLng(51.5827125, 0.018366))
+    private val londonBias = RectangularBounds.newInstance(LatLng(51.4035835, -0.3493669), LatLng(51.5827125, 0.018366))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,6 +76,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
         val autocompleteFragment =
             supportFragmentManager.findFragmentById(R.id.autocomplete_fragment) as AutocompleteSupportFragment
         autocompleteFragment.setCountries("UK")
+        autocompleteFragment.setLocationBias(londonBias)
         autocompleteFragment.setPlaceFields(
             listOf(
                 Place.Field.ID,
