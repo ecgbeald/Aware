@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ListView
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
@@ -59,9 +60,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
     private lateinit var mMap: GoogleMap
     private lateinit var mClusterManager: ClusterManager<ClusterMarker>
     private var permissionDenied = false
-    private val selectedItems = mutableListOf<Int>(0,1,2,3)
+    private val selectedItems = mutableListOf(0,1,2,3)
 
-//    private val london = LatLngBounds(LatLng(51.463758, -0.237632), LatLng(51.5478144, -0.0527049))
+    private val london = LatLngBounds(LatLng(51.4035835, -0.3493669), LatLng(51.5827125, 0.018366))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -124,6 +125,24 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
             // abort action, not sending anything to backend
             builder.setNegativeButton("CANCEL") {_, _ -> }
             val alertDialog = builder.create()
+            alertDialog.show()
+        }
+
+        findViewById<ImageButton>(R.id.attraction_button).setOnClickListener {
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Attractions")
+            val view = LayoutInflater.from(this).inflate(R.layout.attraction, null)
+            builder.setView(view)
+            val listView = view.findViewById<ListView>(R.id.list_view)
+            val attractions = arrayOf("Kensington Palace", "Royal Albert Hall", "V&A Museum", "King's Den")
+            val attractionLatLng = listOf(LatLng(51.505, -0.1875), LatLng(51.5009, -0.17769),
+                LatLng(51.49659, -0.1725), LatLng(51.50119, -0.141928))
+            listView.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, attractions)
+            val alertDialog = builder.create()
+            listView.setOnItemClickListener{ _, _, position, _ ->
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(attractionLatLng[position], 16f))
+                alertDialog.dismiss()
+            }
             alertDialog.show()
         }
     }
@@ -217,7 +236,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         enableMyLocation()
-//        mMap.setLatLngBoundsForCameraTarget(london)
+        mMap.setLatLngBoundsForCameraTarget(london)
         setUpClusterer()
         var lastMarker: Marker? = null
         if (NewClient.webSocketService.isLoggedIn) {
