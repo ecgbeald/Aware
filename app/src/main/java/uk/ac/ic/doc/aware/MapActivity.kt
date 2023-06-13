@@ -59,9 +59,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
     private lateinit var mMap: GoogleMap
     private lateinit var mClusterManager: ClusterManager<ClusterMarker>
     private var permissionDenied = false
-    private val selectedItems = mutableListOf<Int>()
+    private val selectedItems = mutableListOf<Int>(0,1,2,3)
 
-    private val london = LatLngBounds(LatLng(51.463758, -0.237632), LatLng(51.5478144, -0.0527049))
+//    private val london = LatLngBounds(LatLng(51.463758, -0.237632), LatLng(51.5478144, -0.0527049))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -217,7 +217,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         enableMyLocation()
-        mMap.setLatLngBoundsForCameraTarget(london)
+//        mMap.setLatLngBoundsForCameraTarget(london)
         setUpClusterer()
         var lastMarker: Marker? = null
         if (NewClient.webSocketService.isLoggedIn) {
@@ -291,22 +291,31 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                         timeSpinner.adapter = adapter
                     }
-                    alertDialogBuilder.setTitle("New Marker")
-                        .setNegativeButton("Cancel") { _, _ -> }
-                        .setPositiveButton("Post") { _, _ ->
-                            postMarker(
-                                location,
-                                layout.findViewById<TextView>(R.id.titleBox).text.toString(),
-                                layout.findViewById<TextView>(R.id.descriptionBox).text.toString(),
-                                severity,
-                                timeTextBox.text.toString(),
-                                layout.findViewById<TextView>(R.id.timeout).text.toString()
-                                    .toInt() * timeUnit
-                                //have unit and number textboxes for timeout, calculate number of minutes
-                            )
-                            refreshMarkers()
-                        }
-                        .create().show()
+                        alertDialogBuilder.setTitle("New Marker")
+                            .setNegativeButton("Cancel") { _, _ -> }
+                            .setPositiveButton("Post") { _, _ ->
+                                val timeout =
+                                    layout.findViewById<TextView>(R.id.timeout).text.toString()
+                                if (timeout.isEmpty()) {
+                                    Toast.makeText(
+                                        this@MapActivity,
+                                        "Timeout value not set",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } else {
+                                    postMarker(
+                                        location,
+                                        layout.findViewById<TextView>(R.id.titleBox).text.toString(),
+                                        layout.findViewById<TextView>(R.id.descriptionBox).text.toString(),
+                                        severity,
+                                        timeTextBox.text.toString(),
+                                        layout.findViewById<TextView>(R.id.timeout).text.toString()
+                                            .toInt() * timeUnit
+                                        //have unit and number textboxes for timeout, calculate number of minutes
+                                    )
+                                    refreshMarkers()
+                                }
+                            }.create().show()
                     newMarker?.remove()
                 }
             }
