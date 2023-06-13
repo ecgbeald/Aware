@@ -530,6 +530,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                 marker.description + "\nAdded ${minuteDifferenceConverter(minuteDifference)} ago\nExpiring in ${
                     minuteDifferenceConverter(marker.timeout.toLong() - minuteDifference)
                 }"
+            if (marker.timeout.toLong() < minuteDifference) {
+                NewClient.webSocketService.webSocket.send("delete<:>"+marker.id)
+                continue
+            }
             mClusterManager.addItem(
                 ClusterMarker(
                     marker.id,
