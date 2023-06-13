@@ -48,12 +48,27 @@
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="600dp"
+        android:layout_marginTop="685dp"
+        android:layout_marginBottom="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:background="@color/transparent"
         app:srcCompat="@drawable/filter"
         android:contentDescription="a filter button" />
+
+    <ImageButton
+        android:id="@+id/attraction_button"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="350dp"
+        android:layout_marginTop="685dp"
+        android:layout_marginBottom="15dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@color/transparent"
+        app:srcCompat="@drawable/attraction"
+        android:contentDescription="an attraction button" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
