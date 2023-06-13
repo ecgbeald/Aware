@@ -1,5 +1,6 @@
 package uk.ac.ic.doc.aware
 
+import GeofenceManager
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.TimePickerDialog
@@ -66,6 +67,7 @@ import java.util.concurrent.TimeUnit
 class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermissionsResultCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var mClusterManager: ClusterManager<ClusterMarker>
+    private lateinit var geofenceManager: GeofenceManager
     private var permissionDenied = false
     private val selectedItems = mutableListOf<Int>()
 
@@ -224,6 +226,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
         mMap = googleMap
         enableMyLocation()
         mMap.setLatLngBoundsForCameraTarget(london)
+        geofenceManager = GeofenceManager(this)
         setUpClusterer()
         var lastMarker: Marker? = null
         if (NewClient.webSocketService.isLoggedIn) {
@@ -411,6 +414,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
 
     @SuppressLint("CheckResult")
     private fun getMarkers() {
+        geofenceManager.clear()
         val jsonFilters = Gson().toJson(selectedItems)
         val latch = CountDownLatch(1)
         NewClient.webSocketService.latch = latch
@@ -425,7 +429,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
             val minuteDifference = ChronoUnit.MINUTES.between(convertDate, currentTime)
             val description =
                 marker.description + "\nAdded ${minuteDifferenceConverter(minuteDifference)} ago\nExpiring in ${
-                    minuteDifferenceConverter(marker.timeout.toLong())
+                    minuteDifferenceConverter(marker.timeout.toLong() - minuteDifference)
                 }"
             mClusterManager.addItem(
                 ClusterMarker(
@@ -438,8 +442,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                     marker.timeout
                 )
             )
+            geofenceManager.addGeofence(marker.id.toString(),marker.lat,marker.lng,500f,marker.timeout.toLong() - minuteDifference)
+
         }
         mClusterManager.cluster()
+        geofenceManager.stopGeofencing()
+        geofenceManager.startGeofencing()
     }
 
     private fun delete(id: Int) {
