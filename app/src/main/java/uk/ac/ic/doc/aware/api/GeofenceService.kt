@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
@@ -22,6 +23,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.Task
+import uk.ac.ic.doc.aware.R
 import uk.ac.ic.doc.aware.models.GeofenceBroadcastReceiver
 
 class GeofenceService() : Service() {
@@ -72,7 +74,7 @@ class GeofenceService() : Service() {
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
             .setContentTitle("WebSocket Service")
             .setContentText("Running in the background")
-//            .setSmallIcon(R.drawable.notification_icon)
+            .setSmallIcon(R.drawable.notif)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

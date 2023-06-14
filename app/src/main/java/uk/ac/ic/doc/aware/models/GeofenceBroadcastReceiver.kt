@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Build
 import android.util.Log
@@ -55,7 +56,8 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         createNotificationChannel(context)
 
         val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.major)
+            .setSmallIcon(R.drawable.notif)
+            .setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.notif))
             .setContentTitle("Geofence Notification")
             .setContentText(message)
             .setColor(Color.BLUE)

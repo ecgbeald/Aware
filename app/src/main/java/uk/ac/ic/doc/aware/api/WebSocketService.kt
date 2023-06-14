@@ -21,7 +21,6 @@ import okio.ByteString
 import uk.ac.ic.doc.aware.MapActivity
 import uk.ac.ic.doc.aware.R
 import java.util.concurrent.CountDownLatch
-import kotlin.properties.Delegates
 
 class WebSocketService: Service() {
     lateinit var webSocket: WebSocket
@@ -63,7 +62,7 @@ class WebSocketService: Service() {
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
             .setContentTitle("WebSocket Service")
             .setContentText("Running in the background")
-//            .setSmallIcon(R.drawable.notification_icon)
+            .setSmallIcon(R.drawable.notif)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

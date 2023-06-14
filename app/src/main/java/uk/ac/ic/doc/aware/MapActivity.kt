@@ -1,6 +1,5 @@
 package uk.ac.ic.doc.aware
 
-import GeofenceManager
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.TimePickerDialog
@@ -68,7 +67,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
     private val selectedItems = mutableListOf(0, 1, 2, 3)
 
     private val london = LatLngBounds(LatLng(51.4035835, -0.3493669), LatLng(51.5827125, 0.018366))
-    private val londonBias = RectangularBounds.newInstance(LatLng(51.4035835, -0.3493669), LatLng(51.5827125, 0.018366))
+    private val londonBias =
+        RectangularBounds.newInstance(LatLng(51.4035835, -0.3493669), LatLng(51.5827125, 0.018366))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -114,7 +114,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
             builder.setMultiChoiceItems(listItems, checkedItems) { _, which, isChecked ->
                 checkedItems[which] = isChecked
             }
-            builder.setCancelable(false)
+//            builder.setCancelable(false)
             builder.setPositiveButton("OK") { _, _ ->
                 selectedItems.clear()
                 for (i in checkedItems.indices) {
@@ -137,15 +137,29 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
 
         findViewById<ImageButton>(R.id.attraction_button).setOnClickListener {
             val builder = AlertDialog.Builder(this)
-            builder.setTitle("Attractions")
+            builder.setTitle("Attractions in London")
             val view = LayoutInflater.from(this).inflate(R.layout.attraction, null)
             builder.setView(view)
             val listView = view.findViewById<ListView>(R.id.list_view)
             val attractions =
-                arrayOf("Kensington Palace", "Royal Albert Hall", "V&A Museum", "King's Den")
+                arrayOf(
+                    "Kensington Palace",
+                    "Royal Albert Hall",
+                    "V&A Museum",
+                    "Buckingham Palace",
+                    "Westfield London",
+                    "The British Museum",
+                    "Trafalgar Square",
+                    "Prime Meridian",
+                    "St. Paul's Cathedral",
+                    "Tower of London"
+                )
             val attractionLatLng = listOf(
                 LatLng(51.505, -0.1875), LatLng(51.5009, -0.17769),
-                LatLng(51.49659, -0.1725), LatLng(51.50119, -0.141928)
+                LatLng(51.49659, -0.1725), LatLng(51.50119, -0.141928),
+                LatLng(51.507, -0.22019), LatLng(51.519, -0.1273),
+                LatLng(51.508, -0.128), LatLng(51.478, 0.0),
+                LatLng(51.5139, -0.0982), LatLng(51.509, -0.076457)
             )
             listView.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, attractions)
             val alertDialog = builder.create()
@@ -408,7 +422,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                     layout.findViewById<EditText>(R.id.descriptionBox).setText(snippet)
                     var timeUnit = 1
                     var timeout = item.getTimeout() // timeout in minute
-                    if (timeout >=  1440) {
+                    if (timeout >= 1440) {
                         timeout /= 1440
                         timeUnit = 1440
                     } else if (timeout >= 60) {
@@ -470,11 +484,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                     ).also { adapter ->
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                         timeSpinner.adapter = adapter
-                        timeSpinner.setSelection(when (timeUnit) {
-                            1 -> 0
-                            60 -> 1
-                            else -> 2
-                        })
+                        timeSpinner.setSelection(
+                            when (timeUnit) {
+                                1 -> 0
+                                60 -> 1
+                                else -> 2
+                            }
+                        )
                     }
                     alertDialogBuilder.setTitle("Change Marker")
                         .setNegativeButton("Delete") { _, _ -> delete(item.getId()) }
@@ -533,7 +549,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                     minuteDifferenceConverter(marker.timeout.toLong() - minuteDifference)
                 }"
             if (marker.timeout.toLong() < minuteDifference) {
-                NewClient.webSocketService.webSocket.send("delete<:>"+marker.id)
+                NewClient.webSocketService.webSocket.send("delete<:>" + marker.id)
                 continue
             }
             mClusterManager.addItem(
@@ -547,7 +563,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                     marker.timeout
                 )
             )
-            geofenceManager.addGeofence(marker.id.toString(),marker.lat,marker.lng,500f,marker.timeout.toLong() - minuteDifference)
+            geofenceManager.addGeofence(
+                marker.id.toString(),
+                marker.lat,
+                marker.lng,
+                500f,
+                marker.timeout.toLong() - minuteDifference
+            )
 
         }
         mClusterManager.cluster()
