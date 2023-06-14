@@ -1,6 +1,5 @@
 package uk.ac.ic.doc.aware
 
-import uk.ac.ic.doc.aware.api.LocationForegroundService
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -8,6 +7,7 @@ import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import uk.ac.ic.doc.aware.api.Client
@@ -72,6 +72,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         setContentView(binding.root)
         binding.map.setOnClickListener {
             Client.isLoggedIn = false
