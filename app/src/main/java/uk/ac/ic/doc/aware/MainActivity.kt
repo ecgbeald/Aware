@@ -1,17 +1,22 @@
 package uk.ac.ic.doc.aware
 
+import uk.ac.ic.doc.aware.api.LocationForegroundService
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.IBinder
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.google.android.gms.location.LocationServices
 import uk.ac.ic.doc.aware.api.Client
+import uk.ac.ic.doc.aware.api.GeofenceClient
+import uk.ac.ic.doc.aware.api.GeofenceService
 import uk.ac.ic.doc.aware.api.NewClient
 import uk.ac.ic.doc.aware.api.WebSocketService
 import uk.ac.ic.doc.aware.databinding.ActivityMainBinding
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,6 +45,29 @@ class MainActivity : AppCompatActivity() {
             isServiceBound = false
         }
     }
+    private val serviceConnection2 = object : ServiceConnection {
+
+        override fun onNullBinding(name: ComponentName?) {
+            super.onNullBinding(name)
+            println("NO BINDER RECEIVED :(")
+        }
+
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            println("GeoFence onServiceConnected called")
+            val binder = service as GeofenceService.LocalBinder
+            GeofenceClient.geofenceClient = binder.getService()
+            GeofenceClient.geofenceClient.context = this@MainActivity
+            GeofenceClient.geofenceClient.geofencingClient = LocationServices.getGeofencingClient(this@MainActivity)
+            isServiceBound = true
+
+            // You can now access the WebSocket service and use its methods or variables.
+            // For example, you can call webSocketService.sendMessage("Hello") to send a message.
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            isServiceBound = false
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +84,10 @@ class MainActivity : AppCompatActivity() {
         }
         val serviceIntent = Intent(this, WebSocketService::class.java)
         ContextCompat.startForegroundService(this, serviceIntent)
-        println(applicationContext.bindService(Intent(this, WebSocketService::class.java), serviceConnection, Context.BIND_AUTO_CREATE))
+        applicationContext.bindService(Intent(this, WebSocketService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
+        val serviceIntent2 = Intent(this, GeofenceService::class.java)
+        ContextCompat.startForegroundService(this, serviceIntent2)
+        applicationContext.bindService(Intent(this, GeofenceService::class.java), serviceConnection2, Context.BIND_AUTO_CREATE)
+
     }
 }

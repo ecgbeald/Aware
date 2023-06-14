@@ -45,6 +45,11 @@
             android:name="uk.ac.ic.doc.aware.api.WebSocketService"
             android:exported="false"
             android:enabled="true"/>
+        <service
+            android:name="uk.ac.ic.doc.aware.api.GeofenceService"
+            android:exported="false"
+            android:enabled="true"/>
+
 
     </application>
 

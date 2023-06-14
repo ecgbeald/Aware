@@ -20,7 +20,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
     private val TAG = "GeofenceBroadcastReceiver"
     private val CHANNEL_ID = "GeofenceChannel"
-    private val NOTIFICATION_ID = 1
+    private val NOTIFICATION_ID = 3
 
     override fun onReceive(context: Context, intent: Intent) {
 

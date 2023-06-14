@@ -40,6 +40,8 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.gson.Gson
 import com.google.maps.android.clustering.ClusterManager
+import uk.ac.ic.doc.aware.api.GeofenceClient
+import uk.ac.ic.doc.aware.api.GeofenceService
 import uk.ac.ic.doc.aware.api.NewClient
 import uk.ac.ic.doc.aware.models.ClusterMarker
 import uk.ac.ic.doc.aware.models.CustomClusterRenderer
@@ -61,7 +63,7 @@ import java.util.concurrent.TimeUnit
 class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermissionsResultCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var mClusterManager: ClusterManager<ClusterMarker>
-    private lateinit var geofenceManager: GeofenceManager
+    private lateinit var geofenceManager: GeofenceService
     private var permissionDenied = false
     private val selectedItems = mutableListOf(0, 1, 2, 3)
 
@@ -245,7 +247,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
         mMap = googleMap
         enableMyLocation()
         mMap.setLatLngBoundsForCameraTarget(london)
-        geofenceManager = GeofenceManager(this)
+        geofenceManager = GeofenceClient.geofenceClient
         setUpClusterer()
         var lastMarker: Marker? = null
         if (NewClient.webSocketService.isLoggedIn) {
