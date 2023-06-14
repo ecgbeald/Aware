@@ -45,11 +45,11 @@
 
     <ImageButton
         android:id="@+id/filter_button"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
+        android:layout_width="37dp"
+        android:layout_height="37dp"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="685dp"
-        android:layout_marginBottom="15dp"
+        android:layout_marginTop="680dp"
+        android:layout_marginBottom="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -59,11 +59,11 @@
 
     <ImageButton
         android:id="@+id/attraction_button"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
-        android:layout_marginStart="350dp"
-        android:layout_marginTop="685dp"
-        android:layout_marginBottom="15dp"
+        android:layout_width="37dp"
+        android:layout_height="37dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="640dp"
+        android:layout_marginBottom="60dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
