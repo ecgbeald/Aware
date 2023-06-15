@@ -154,14 +154,17 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                     "Trafalgar Square",
                     "Prime Meridian",
                     "St. Paul's Cathedral",
-                    "Tower of London"
+                    "Tower of London",
+                    "The Gherkin",
+                    "Kings Mall"
                 )
             val attractionLatLng = listOf(
                 LatLng(51.505, -0.1875), LatLng(51.5009, -0.17769),
                 LatLng(51.49659, -0.1725), LatLng(51.50119, -0.141928),
                 LatLng(51.507, -0.22019), LatLng(51.519, -0.1273),
                 LatLng(51.508, -0.128), LatLng(51.478, 0.0),
-                LatLng(51.5139, -0.0982), LatLng(51.509, -0.076457)
+                LatLng(51.5139, -0.0982), LatLng(51.509, -0.076457),
+                LatLng(51.514, -0.0803), LatLng(51.493, -0.228)
             )
             listView.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, attractions)
             val alertDialog = builder.create()

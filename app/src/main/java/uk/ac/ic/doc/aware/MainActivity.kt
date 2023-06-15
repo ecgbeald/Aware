@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -82,6 +83,8 @@ class MainActivity : AppCompatActivity() {
             Client.isLoggedIn = false
             val intent = Intent(this, MapActivity::class.java)
             startActivity(intent)
+            // no settings
+            binding.settings.visibility = View.GONE
         }
         binding.login.setOnClickListener {
             val intent = Intent(this, LoginActivity::class.java)
