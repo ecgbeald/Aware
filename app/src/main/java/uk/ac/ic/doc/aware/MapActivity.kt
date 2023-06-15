@@ -499,7 +499,26 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                     }
                     alertDialogBuilder.setTitle("Change Marker")
                         .setNegativeButton("Delete") { _, _ -> delete(item.getId()) }
-                        .setPositiveButton("Change") { _, _ -> update(layout.findViewById<TextView>(R.id.titleBox).text.toString(),layout.findViewById<TextView>(R.id.descriptionBox).text.toString(), item.getPriority(), timeTextBox.text.toString(), item.getTimeout(), item.getId())
+                        .setPositiveButton("Change") { _, _ ->
+                            val timeNow =
+                                LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).atZone(ZoneId.of("Europe/London"))
+                                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+                            val firstSplit = timeNow.split("T")
+                            val timeZone = firstSplit[1].split("+")[1]
+                            val timeStamp = timeTextBox.text.toString()
+                            val finalTime = firstSplit[0] + "T$timeStamp:00+" + timeZone
+
+                            val timeout =
+                                layout.findViewById<TextView>(R.id.timeout).text.toString()
+                            if (timeout.isEmpty()) {
+                                Toast.makeText(
+                                    this@MapActivity,
+                                "Timeout value not set",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                update(layout.findViewById<TextView>(R.id.titleBox).text.toString(),layout.findViewById<TextView>(R.id.descriptionBox).text.toString(), severity, finalTime, timeout.toInt() * timeUnit, item.getId())
+                            }
                             // TODO: PUT request to change content (maybe just delete is enough)
                         }
                         .create().show()
