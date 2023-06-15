@@ -51,8 +51,8 @@ class WebSocketService: Service() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun startForegroundService() {
-        val channelId = "WebSocketChannelId"
-        val channelName = "WebSocket Channel"
+        val channelId = "Aware"
+        val channelName = "Aware Background Service"
         val channelImportance = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             NotificationManager.IMPORTANCE_LOW
         else
@@ -60,7 +60,7 @@ class WebSocketService: Service() {
         val channel = NotificationChannel(channelId, channelName, channelImportance)
 
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("WebSocket Service")
+            .setContentTitle("Aware")
             .setContentText("Running in the background")
             .setSmallIcon(R.drawable.notif)
 
@@ -116,7 +116,9 @@ class WebSocketService: Service() {
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
             println("WebSocket connection failure: ${t.message}")
-            latch.countDown()
+            if (::latch.isInitialized) {
+                latch.countDown()
+            }
         }
 
     }
@@ -147,6 +149,7 @@ class WebSocketService: Service() {
     )
 
     fun toArrayList(s: String) {
+        println(s)
         val typeToken = object : TypeToken<List<MyData>>() {}.type
         this.data = Gson().fromJson<List<MyData>>(s, typeToken)
     }

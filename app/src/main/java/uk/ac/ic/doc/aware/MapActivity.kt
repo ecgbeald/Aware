@@ -66,6 +66,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
     private lateinit var geofenceManager: GeofenceService
     private var permissionDenied = false
     private val selectedItems = mutableListOf(0, 1, 2, 3)
+    private val getCalls = 0
 
     private val london = LatLngBounds(LatLng(51.4035835, -0.3493669), LatLng(51.5827125, 0.018366))
     private val londonBias =
@@ -105,7 +106,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
             refreshMarkers()
         }
         findViewById<ImageButton>(R.id.filter_button).setOnClickListener {
-            val listItems = arrayOf("Theft", "Anti Social", "Road Closure", "Major Incident")
+            val listItems = arrayOf("Theft", "Anti Social", "Travel Disruption", "Major Incident")
             val checkedItems = BooleanArray(listItems.size)
             for (index in selectedItems) {
                 checkedItems[index] = true
@@ -336,7 +337,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                         timeSpinner.adapter = adapter
                     }
-                    alertDialogBuilder.setTitle("New Marker")
+                    alertDialogBuilder.setTitle("Add Alert")
                         .setNegativeButton("Cancel") { _, _ -> }
                         .setPositiveButton("Post") { _, _ ->
                             val timeout =
@@ -532,7 +533,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
 
     @SuppressLint("CheckResult")
     private fun getMarkers() {
-        geofenceManager.clear()
+        val idSet : Set<Int> = geofenceManager.geofenceList.map { it.requestId.toInt() }.toSet()
+        val newSet : MutableSet<Int> = mutableSetOf()
         val jsonFilters = Gson().toJson(selectedItems)
         val latch = CountDownLatch(1)
         NewClient.webSocketService.latch = latch
@@ -541,6 +543,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
             println("Timeout")
         }
         for (marker in NewClient.webSocketService.data) {
+            println(marker.id)
+            println(marker.date)
+            println(marker.title)
+            println(marker.description)
             val currentTime = LocalDateTime.now()
             val convertDate =
                 LocalDateTime.parse(marker.date, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
@@ -564,18 +570,26 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                     marker.timeout
                 )
             )
-            geofenceManager.addGeofence(
-                marker.id.toString(),
-                marker.lat,
-                marker.lng,
-                radiusList[marker.severity].toFloat(),
-                marker.timeout.toLong() - minuteDifference
-            )
 
+            if (marker.id !in idSet) {
+                geofenceManager.addSingleGeofence(
+                    marker.id.toString(),
+                    marker.lat,
+                    marker.lng,
+                    radiusList[marker.severity].toFloat(),
+                    marker.timeout.toLong() - minuteDifference
+                )
+                geofenceManager.geofenceMap[marker.id.toString()] = Pair(marker.severity,radiusList[marker.severity].toFloat())
+            }
+            newSet.add(marker.id)
+        }
+        for (id in idSet) {
+            if (id !in newSet) {
+                println("REMOVING")
+                geofenceManager.removeGeofence(id.toString())
+            }
         }
         mClusterManager.cluster()
-        geofenceManager.stopGeofencing()
-        geofenceManager.startGeofencing()
     }
 
     private fun delete(id: Int) {

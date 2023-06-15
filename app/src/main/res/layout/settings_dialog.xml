@@ -76,7 +76,7 @@
         android:layout_alignParentStart="true"
         android:layout_marginTop="10dp"
         android:layout_marginStart="5dp"
-        android:text="Road Closure: "
+        android:text="Travel Disruption: "
         android:layout_below="@+id/anti_radius"
         android:textSize="18sp"/>
 

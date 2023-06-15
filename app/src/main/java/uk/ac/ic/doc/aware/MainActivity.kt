@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity() {
                 if (majorRadiusStr.isNotEmpty()) {
                     radiusList[3] = majorRadiusStr.toInt()
                 } else {
-                    radiusList[4] = 400
+                    radiusList[3] = 400
                 }
                 println(radiusList)
             }

@@ -3,7 +3,7 @@
     <string-array name="event_array">
         <item>Theft</item>
         <item>Anti Social</item>
-        <item>Road Closure</item>
+        <item>Travel Disruption</item>
         <item>Major Incident</item>
     </string-array>
 

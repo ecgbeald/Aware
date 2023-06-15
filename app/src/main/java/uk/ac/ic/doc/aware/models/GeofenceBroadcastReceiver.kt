@@ -16,12 +16,14 @@ import androidx.core.app.NotificationManagerCompat
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
 import uk.ac.ic.doc.aware.R
+import uk.ac.ic.doc.aware.api.GeofenceClient
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
     private val TAG = "GeofenceBroadcastReceiver"
     private val CHANNEL_ID = "GeofenceChannel"
-    private val NOTIFICATION_ID = 3
+    private val CRIMES = listOf("THEFT","ANTI-SOCIAL BEHAVIOUR","TRAVEL DISRUPTION","MAJOR INCIDENT")
+    private val ICONS = listOf(R.drawable.theft, R.drawable.anti_social, R.drawable.block, R.drawable.major)
 
     override fun onReceive(context: Context, intent: Intent) {
 
@@ -36,11 +38,18 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
         val geofenceTransition = geofencingEvent?.geofenceTransition
         val geofenceList = geofencingEvent?.triggeringGeofences
-        println(geofenceTransition)
-        println(geofenceTransition)
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
             Log.d(TAG, "Entered geofence")
-            sendNotification(context, "WITHIN 500m of ALERT")
+            if (geofenceList != null) {
+                for (geofence in geofenceList) {
+                    println(geofence.requestId)
+                    val severity = GeofenceClient.geofenceClient.geofenceMap[geofence.requestId]!!.first
+                    val message = CRIMES[severity]
+                    val dist = GeofenceClient.geofenceClient.geofenceMap[geofence.requestId]!!.second
+                    sendNotification(context, "Within " + dist.toInt() + "m of $message!", severity, geofence.requestId.toInt())
+                }
+            }
+
             println("ENTERED REEEE")
 
             // Handle geofence enter event
@@ -52,26 +61,26 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
     }
 
     @SuppressLint("MissingPermission")
-    private fun sendNotification(context: Context, message: String) {
+    private fun sendNotification(context: Context, message: String, severity: Int, id: Int) {
         createNotificationChannel(context)
 
         val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.notif)
-            .setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.notif))
-            .setContentTitle("Geofence Notification")
+            .setLargeIcon(BitmapFactory.decodeResource(context.resources, ICONS[severity]))
+            .setContentTitle("Aware Alert")
             .setContentText(message)
             .setColor(Color.BLUE)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
 
         val notificationManager = NotificationManagerCompat.from(context)
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+        notificationManager.notify(id, notificationBuilder.build())
     }
 
     private fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "Geofence Channel"
-            val descriptionText = "Channel for geofence notifications"
+            val name = "Alert Channel"
+            val descriptionText = "Channel for geo-location alerts"
             val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = descriptionText
