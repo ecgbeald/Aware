@@ -23,7 +23,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginEnd="20dp"
         android:gravity="end"
-        android:text="Meters"
+        android:text="metres"
         android:textSize="18sp" />
 
     <EditText
@@ -55,7 +55,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginEnd="20dp"
         android:gravity="end"
-        android:text="Meters"
+        android:text="metres"
         android:textSize="18sp" />
 
     <EditText
@@ -89,7 +89,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginEnd="20dp"
         android:gravity="end"
-        android:text="Meters"
+        android:text="metres"
         android:textSize="18sp" />
 
     <EditText
@@ -122,7 +122,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginEnd="20dp"
         android:gravity="end"
-        android:text="Meters"
+        android:text="metres"
         android:textSize="18sp" />
 
     <EditText

@@ -199,7 +199,10 @@ class GeofenceService() : Service() {
 
     fun removeGeofence(id : String) {
         geofencingClient.removeGeofences(listOf(id)) .addOnSuccessListener {
-            for (geofence in geofenceList) {
+            val copy : MutableList<Geofence> = mutableListOf()
+            copy.addAll(geofenceList)
+
+            for (geofence in copy) {
                 if (geofence.requestId == id) {
                     geofenceList.remove(geofence)
                 }

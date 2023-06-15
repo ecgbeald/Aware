@@ -270,7 +270,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
             mMap.setOnMapLongClickListener { location ->
                 lastMarker?.remove()
                 val newMarker =
-                    mMap.addMarker(MarkerOptions().position(location).title("New Marker"))
+                    mMap.addMarker(MarkerOptions().position(location).title("Add Alert"))
                 lastMarker = newMarker
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
                 mMap.setOnInfoWindowClickListener {
