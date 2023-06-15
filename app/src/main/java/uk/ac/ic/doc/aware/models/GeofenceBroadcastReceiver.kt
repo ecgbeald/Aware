@@ -61,7 +61,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             .setContentTitle("Geofence Notification")
             .setContentText(message)
             .setColor(Color.BLUE)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
 
         val notificationManager = NotificationManagerCompat.from(context)
@@ -72,7 +72,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Geofence Channel"
             val descriptionText = "Channel for geofence notifications"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = descriptionText
             }

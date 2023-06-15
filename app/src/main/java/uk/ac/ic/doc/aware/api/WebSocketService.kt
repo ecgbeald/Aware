@@ -54,7 +54,7 @@ class WebSocketService: Service() {
         val channelId = "WebSocketChannelId"
         val channelName = "WebSocket Channel"
         val channelImportance = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            NotificationManager.IMPORTANCE_DEFAULT
+            NotificationManager.IMPORTANCE_LOW
         else
             NotificationManager.IMPORTANCE_NONE
         val channel = NotificationChannel(channelId, channelName, channelImportance)

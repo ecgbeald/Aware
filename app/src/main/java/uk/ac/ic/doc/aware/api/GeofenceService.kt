@@ -65,13 +65,13 @@ class GeofenceService() : Service() {
         val channelId = "GeofenceChannelId"
         val channelName = "Geofence Channel"
         val channelImportance = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            NotificationManager.IMPORTANCE_DEFAULT
+            NotificationManager.IMPORTANCE_LOW
         else
             NotificationManager.IMPORTANCE_NONE
         val channel = NotificationChannel(channelId, channelName, channelImportance)
 
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("WebSocket Service")
+            .setContentTitle("Geofencing Service")
             .setContentText("Running in the background")
             .setSmallIcon(R.drawable.notif)
 
