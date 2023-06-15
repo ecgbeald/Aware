@@ -47,6 +47,7 @@ import uk.ac.ic.doc.aware.models.CustomClusterRenderer
 import uk.ac.ic.doc.aware.models.CustomInfoWindow
 import uk.ac.ic.doc.aware.models.PermissionUtils
 import uk.ac.ic.doc.aware.models.PermissionUtils.PermissionDeniedDialog.Companion.newInstance
+import uk.ac.ic.doc.aware.models.RadiusList.radiusList
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -567,7 +568,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                 marker.id.toString(),
                 marker.lat,
                 marker.lng,
-                500f,
+                radiusList[marker.severity].toFloat(),
                 marker.timeout.toLong() - minuteDifference
             )
 
