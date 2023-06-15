@@ -496,7 +496,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                     }
                     alertDialogBuilder.setTitle("Change Marker")
                         .setNegativeButton("Delete") { _, _ -> delete(item.getId()) }
-                        .setPositiveButton("Change") { _, _ ->
+                        .setPositiveButton("Change") { _, _ -> update(layout.findViewById<TextView>(R.id.titleBox).text.toString(),layout.findViewById<TextView>(R.id.descriptionBox).text.toString(), item.getPriority(), timeTextBox.text.toString(), item.getTimeout(), item.getId())
                             // TODO: PUT request to change content (maybe just delete is enough)
                         }
                         .create().show()
@@ -594,6 +594,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
 
     private fun delete(id: Int) {
         NewClient.webSocketService.webSocket.send("delete<:>$id")
+    }
+
+    private fun update(title: String, description: String, severity: Int, date: String, timeout: Int, id: Int) {
+        NewClient.webSocketService.webSocket.send("update<:>$title<:>$description<:>$severity<:>$date<:>$timeout<:>$id")
     }
 
     // for the cool clock widget thingy
