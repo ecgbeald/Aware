@@ -340,9 +340,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                         timeSpinner.adapter = adapter
                     }
-                    alertDialogBuilder.setTitle("Add Alert")
+                    val alertDialog = alertDialogBuilder.setTitle("Add Alert")
                         .setNegativeButton("Cancel") { _, _ -> }
-                        .setPositiveButton("Post") { _, _ ->
+                        .setPositiveButton("Post") { _, _ -> }.create()
+                    alertDialog.setOnShowListener {
+                        val button = alertDialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE)
+                        button.setOnClickListener {
                             val timeout =
                                 layout.findViewById<TextView>(R.id.timeout).text.toString()
                             if (timeout.isEmpty()) {
@@ -351,19 +354,38 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                                     "Timeout value not set",
                                     Toast.LENGTH_SHORT
                                 ).show()
+                            } else if (timeout.toInt() == 0) {
+                                Toast.makeText(
+                                    this@MapActivity,
+                                    "Timeout value cannot be 0",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             } else {
+                                var title =
+                                    layout.findViewById<TextView>(R.id.titleBox).text.toString()
+                                if (title.isEmpty()) {
+                                    title = "(untitled)"
+                                }
+                                var description =
+                                    layout.findViewById<TextView>(R.id.descriptionBox).text.toString()
+                                if (description.isEmpty()) {
+                                    description = "(no description)"
+                                }
                                 postMarker(
                                     location,
-                                    layout.findViewById<TextView>(R.id.titleBox).text.toString(),
-                                    layout.findViewById<TextView>(R.id.descriptionBox).text.toString(),
+                                    title,
+                                    description,
                                     severity,
                                     timeTextBox.text.toString(),
                                     timeout.toInt() * timeUnit
                                     //have unit and number textboxes for timeout, calculate number of minutes
                                 )
                                 refreshMarkers()
+                                alertDialog.dismiss()
                             }
-                        }.create().show()
+                        }
+                    }
+                    alertDialog.show()
                     newMarker?.remove()
                 }
             }
@@ -497,31 +519,50 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                             }
                         )
                     }
-                    alertDialogBuilder.setTitle("Change Marker")
+                    val alertDialog = alertDialogBuilder.setTitle("Change Marker")
                         .setNegativeButton("Delete") { _, _ -> delete(item.getId()) }
-                        .setPositiveButton("Change") { _, _ ->
+                        .setPositiveButton("Change") { _, _ -> }
+                        .create()
+                    alertDialog.setOnShowListener {
+                        val button = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                        button.setOnClickListener {
                             val timeNow =
-                                LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).atZone(ZoneId.of("Europe/London"))
+                                LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+                                    .atZone(ZoneId.of("Europe/London"))
                                     .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
                             val firstSplit = timeNow.split("T")
                             val timeZone = firstSplit[1].split("+")[1]
                             val timeStamp = timeTextBox.text.toString()
                             val finalTime = firstSplit[0] + "T$timeStamp:00+" + timeZone
 
-                            val timeout =
+                            val mTimeout =
                                 layout.findViewById<TextView>(R.id.timeout).text.toString()
-                            if (timeout.isEmpty()) {
+                            if (mTimeout.isEmpty()) {
                                 Toast.makeText(
                                     this@MapActivity,
-                                "Timeout value not set",
+                                    "Timeout value not set",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else if (mTimeout.toInt() == 0) {
+                                Toast.makeText(
+                                    this@MapActivity,
+                                    "Timeout value cannot be 0",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             } else {
-                                update(layout.findViewById<TextView>(R.id.titleBox).text.toString(),layout.findViewById<TextView>(R.id.descriptionBox).text.toString(), severity, finalTime, timeout.toInt() * timeUnit, item.getId())
+                                update(
+                                    layout.findViewById<TextView>(R.id.titleBox).text.toString(),
+                                    layout.findViewById<TextView>(R.id.descriptionBox).text.toString(),
+                                    severity,
+                                    finalTime,
+                                    mTimeout.toInt() * timeUnit,
+                                    item.getId()
+                                )
+                                alertDialog.dismiss()
                             }
-                            // TODO: PUT request to change content (maybe just delete is enough)
                         }
-                        .create().show()
+                    }
+                    alertDialog.show()
                 }
             }
             // if true, click handling stops here and do not show info view, do not move camera
@@ -555,8 +596,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
 
     @SuppressLint("CheckResult")
     private fun getMarkers() {
-        val idSet : Set<Int> = geofenceManager.geofenceList.map { it.requestId.toInt() }.toSet()
-        val newSet : MutableSet<Int> = mutableSetOf()
+        val idSet: Set<Int> = geofenceManager.geofenceList.map { it.requestId.toInt() }.toSet()
+        val newSet: MutableSet<Int> = mutableSetOf()
         val jsonFilters = Gson().toJson(selectedItems)
         val latch = CountDownLatch(1)
         NewClient.webSocketService.latch = latch
@@ -601,7 +642,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                     radiusList[marker.severity].toFloat(),
                     marker.timeout.toLong() - minuteDifference
                 )
-                geofenceManager.geofenceMap[marker.id.toString()] = Pair(marker.severity,radiusList[marker.severity].toFloat())
+                geofenceManager.geofenceMap[marker.id.toString()] =
+                    Pair(marker.severity, radiusList[marker.severity].toFloat())
             }
             newSet.add(marker.id)
         }
@@ -618,7 +660,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
         NewClient.webSocketService.webSocket.send("delete<:>$id")
     }
 
-    private fun update(title: String, description: String, severity: Int, date: String, timeout: Int, id: Int) {
+    private fun update(
+        title: String,
+        description: String,
+        severity: Int,
+        date: String,
+        timeout: Int,
+        id: Int
+    ) {
         NewClient.webSocketService.webSocket.send("update<:>$title<:>$description<:>$severity<:>$date<:>$timeout<:>$id")
     }
 
