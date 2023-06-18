@@ -23,7 +23,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
     private val TAG = "GeofenceBroadcastReceiver"
     private val CHANNEL_ID = "GeofenceChannel"
     private val CRIMES = listOf("THEFT","ANTI-SOCIAL BEHAVIOUR","TRAVEL DISRUPTION","MAJOR INCIDENT")
-    private val ICONS = listOf(R.drawable.theft, R.drawable.anti_social, R.drawable.block, R.drawable.major)
+    private val ICONS = listOf(R.drawable.theft_hires, R.drawable.anti_social_hires, R.drawable.block_hires, R.drawable.major_hires)
 
     override fun onReceive(context: Context, intent: Intent) {
 

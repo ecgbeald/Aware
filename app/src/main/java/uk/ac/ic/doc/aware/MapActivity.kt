@@ -422,11 +422,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
         mClusterManager.markerCollection
             .setInfoWindowAdapter(CustomInfoWindow(LayoutInflater.from(this)))
         mClusterManager.setOnClusterItemClickListener { item ->
-            Toast.makeText(
-                this@MapActivity,
-                "Cluster item ${item.getId()} clicked",
-                Toast.LENGTH_SHORT
-            ).show()
+//            Toast.makeText(
+//                this@MapActivity,
+//                "Cluster item ${item.getId()} clicked",
+//                Toast.LENGTH_SHORT
+//            ).show()
             if (NewClient.webSocketService.isLoggedIn) {
                 mMap.setOnInfoWindowClickListener {
                     val alertDialogBuilder = AlertDialog.Builder(this)
@@ -572,10 +572,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
         }
         mClusterManager.setOnClusterItemInfoWindowClickListener { stringClusterItem ->
             // TODO: maybe add a new popup for details
-            Toast.makeText(
-                this@MapActivity, "Clicked info window: " + stringClusterItem.title,
-                Toast.LENGTH_SHORT
-            ).show()
+//            Toast.makeText(
+//                this@MapActivity, "Clicked info window: " + stringClusterItem.title,
+//                Toast.LENGTH_SHORT
+//            ).show()
         }
         mMap.setInfoWindowAdapter(mClusterManager.markerManager)
         mMap.setOnInfoWindowClickListener(mClusterManager)
