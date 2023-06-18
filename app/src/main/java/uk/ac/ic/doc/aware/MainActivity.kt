@@ -14,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
-import uk.ac.ic.doc.aware.api.Client
 import uk.ac.ic.doc.aware.api.GeofenceClient
 import uk.ac.ic.doc.aware.api.GeofenceService
 import uk.ac.ic.doc.aware.api.NewClient
@@ -83,7 +82,7 @@ class MainActivity : AppCompatActivity() {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         setContentView(binding.root)
         binding.map.setOnClickListener {
-            Client.isLoggedIn = false
+            NewClient.webSocketService.isLoggedIn = false
             val intent = Intent(this, MapActivity::class.java)
             startActivity(intent)
             // no settings
