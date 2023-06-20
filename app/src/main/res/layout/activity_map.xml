@@ -45,30 +45,30 @@
 
     <ImageButton
         android:id="@+id/filter_button"
-        android:layout_width="37dp"
+        android:layout_width="120dp"
         android:layout_height="37dp"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="680dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginTop="670dp"
+        android:layout_marginBottom="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:background="@color/transparent"
-        app:srcCompat="@drawable/filter"
+        app:srcCompat="@drawable/filter_120"
         android:contentDescription="a filter button" />
 
     <ImageButton
         android:id="@+id/attraction_button"
-        android:layout_width="37dp"
+        android:layout_width="120dp"
         android:layout_height="37dp"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="640dp"
-        android:layout_marginBottom="60dp"
+        android:layout_marginTop="620dp"
+        android:layout_marginBottom="80dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:background="@color/transparent"
-        app:srcCompat="@drawable/attraction"
+        app:srcCompat="@drawable/landmark_120"
         android:contentDescription="an attraction button" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
