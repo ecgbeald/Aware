@@ -15,6 +15,7 @@
         android:inputType="text"
         android:singleLine="true"
         tools:ignore="LabelFor"
+        android:maxLength="35"
         android:importantForAutofill="no" />
 
     <EditText
@@ -24,10 +25,12 @@
         android:id="@+id/descriptionBox"
         android:hint="Description"
         android:gravity="top"
+        android:textSize="16sp"
         android:inputType="textMultiLine"
         android:scrollbars="vertical"
         android:lines="5"
         android:maxLines="7"
+        android:maxLength="280"
         tools:ignore="LabelFor"
         android:importantForAutofill="no" />
 
@@ -80,6 +83,7 @@
         android:id="@+id/timeout"
         android:layout_width="wrap_content"
         android:inputType="number"
+        android:maxLength="5"
         android:layout_below="@id/textView3"
         android:layout_height="wrap_content"
         android:hint="Timeout" />
