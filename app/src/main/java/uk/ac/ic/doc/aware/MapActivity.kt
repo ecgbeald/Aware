@@ -278,6 +278,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                 val newMarker =
                     mMap.addMarker(MarkerOptions().position(location).title("Add Alert"))
                 lastMarker = newMarker
+                newMarker!!.showInfoWindow()
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
                 mMap.setOnInfoWindowClickListener {
                     val alertDialogBuilder = AlertDialog.Builder(this)
