@@ -1,5 +1,6 @@
 package uk.ac.ic.doc.aware.api
 
+import android.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -9,6 +10,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat.finishAffinity
 import androidx.core.app.NotificationCompat
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -18,9 +20,11 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
+import uk.ac.ic.doc.aware.MainActivity
 import uk.ac.ic.doc.aware.MapActivity
 import uk.ac.ic.doc.aware.R
 import java.util.concurrent.CountDownLatch
+
 
 class WebSocketService: Service() {
     lateinit var webSocket: WebSocket
@@ -29,12 +33,18 @@ class WebSocketService: Service() {
     lateinit var mapActivity: MapActivity
     var isLoggedIn = false
     lateinit var salt: String
+    private var awareApplication: AwareApplication? = null
 
     fun isDataInitialized() = ::data.isInitialized
     private val binder: IBinder = LocalBinder()
 
     inner class LocalBinder : Binder() {
         fun getService(): WebSocketService = this@WebSocketService
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        awareApplication = applicationContext as? AwareApplication
     }
 
     override fun onBind(intent: Intent?): IBinder {
@@ -119,6 +129,26 @@ class WebSocketService: Service() {
             if (::latch.isInitialized) {
                 latch.countDown()
             }
+
+            val currentActivity = (applicationContext as? AwareApplication)?.getCurrentActivity()
+            currentActivity?.runOnUiThread {
+                val dialogBuilder = AlertDialog.Builder(currentActivity)
+                dialogBuilder.setMessage("Connection failure. Retry?")
+                    .setPositiveButton("Retry") { dialog, _ ->
+                        // Retry logic
+                        finishAffinity(currentActivity) // Close the app
+                        val intent = Intent(currentActivity, MainActivity::class.java)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        currentActivity.startActivity(intent) // Reopen MainActivity
+                    }
+                    .setNegativeButton("Cancel") { dialog, _ ->
+                        // Cancel logic
+                        finishAffinity(currentActivity) // Close the app
+                    }
+                    .setCancelable(false)
+                    .create()
+                    .show()
+            }
         }
 
     }
@@ -134,7 +164,9 @@ class WebSocketService: Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        webSocket.close(1000, "Service destroyed")
+        if (::webSocket.isInitialized) {
+            webSocket.close(1000, "Service destroyed")
+        }
     }
 
     data class MyData(

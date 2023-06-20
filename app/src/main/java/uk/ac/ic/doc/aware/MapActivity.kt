@@ -3,6 +3,7 @@ package uk.ac.ic.doc.aware
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.TimePickerDialog
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -39,6 +40,7 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.gson.Gson
 import com.google.maps.android.clustering.ClusterManager
+import uk.ac.ic.doc.aware.api.AwareApplication
 import uk.ac.ic.doc.aware.api.GeofenceClient
 import uk.ac.ic.doc.aware.api.GeofenceService
 import uk.ac.ic.doc.aware.api.NewClient
@@ -558,11 +560,31 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
         val idSet : Set<Int> = geofenceManager.geofenceList.map { it.requestId.toInt() }.toSet()
         val newSet : MutableSet<Int> = mutableSetOf()
         val jsonFilters = Gson().toJson(selectedItems)
+        println(selectedItems + " <- selected items")
         val latch = CountDownLatch(1)
         NewClient.webSocketService.latch = latch
         NewClient.webSocketService.webSocket.send("get<:>$jsonFilters")
         if (!latch.await(5, TimeUnit.SECONDS)) {
             println("Timeout")
+            val currentActivity = (applicationContext as? AwareApplication)?.getCurrentActivity()
+            currentActivity?.runOnUiThread {
+                val dialogBuilder = android.app.AlertDialog.Builder(currentActivity)
+                dialogBuilder.setMessage("Connection failure. Retry?")
+                    .setPositiveButton("Retry") { dialog, _ ->
+                        // Retry logic
+                        ActivityCompat.finishAffinity(currentActivity) // Close the app
+                        val intent = Intent(currentActivity, MainActivity::class.java)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        currentActivity.startActivity(intent) // Reopen MainActivity
+                    }
+                    .setNegativeButton("Cancel") { dialog, _ ->
+                        // Cancel logic
+                        ActivityCompat.finishAffinity(currentActivity) // Close the app
+                    }
+                    .setCancelable(false)
+                    .create()
+                    .show()
+            }
         }
         for (marker in NewClient.webSocketService.data) {
             println(marker.id)

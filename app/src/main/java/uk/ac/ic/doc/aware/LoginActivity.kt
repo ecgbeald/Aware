@@ -1,17 +1,13 @@
 package uk.ac.ic.doc.aware
 
-import android.content.ComponentName
-import android.content.Context
+import android.app.AlertDialog
 import android.content.Intent
-import android.content.ServiceConnection
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.IBinder
 import android.widget.Toast
-import androidx.core.content.ContextCompat
-import uk.ac.ic.doc.aware.api.Client
+import androidx.core.app.ActivityCompat
+import uk.ac.ic.doc.aware.api.AwareApplication
 import uk.ac.ic.doc.aware.api.NewClient
-import uk.ac.ic.doc.aware.api.WebSocketService
 import uk.ac.ic.doc.aware.databinding.ActivityLoginBinding
 import java.security.MessageDigest
 import java.util.concurrent.CountDownLatch
@@ -54,6 +50,25 @@ class LoginActivity : AppCompatActivity() {
         if (!latch.await(5, TimeUnit.SECONDS)) {
             NewClient.webSocketService.isLoggedIn = false
             println("Timeout")
+            val currentActivity = (applicationContext as? AwareApplication)?.getCurrentActivity()
+            currentActivity?.runOnUiThread {
+                val dialogBuilder = AlertDialog.Builder(currentActivity)
+                dialogBuilder.setMessage("Connection failure. Retry?")
+                    .setPositiveButton("Retry") { dialog, _ ->
+                        // Retry logic
+                        ActivityCompat.finishAffinity(currentActivity) // Close the app
+                        val intent = Intent(currentActivity, MainActivity::class.java)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        currentActivity.startActivity(intent) // Reopen MainActivity
+                    }
+                    .setNegativeButton("Cancel") { dialog, _ ->
+                        // Cancel logic
+                        ActivityCompat.finishAffinity(currentActivity) // Close the app
+                    }
+                    .setCancelable(false)
+                    .create()
+                    .show()
+            }
         }
         return if (NewClient.webSocketService.salt == "false") {
             NewClient.webSocketService.isLoggedIn = false
@@ -66,6 +81,25 @@ class LoginActivity : AppCompatActivity() {
             if (!mLatch.await(5, TimeUnit.SECONDS)) {
                 NewClient.webSocketService.isLoggedIn = false
                 println("Timeout")
+                val currentActivity = (applicationContext as? AwareApplication)?.getCurrentActivity()
+                currentActivity?.runOnUiThread {
+                    val dialogBuilder = AlertDialog.Builder(currentActivity)
+                    dialogBuilder.setMessage("Connection failure. Retry?")
+                        .setPositiveButton("Retry") { dialog, _ ->
+                            // Retry logic
+                            ActivityCompat.finishAffinity(currentActivity) // Close the app
+                            val intent = Intent(currentActivity, MainActivity::class.java)
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            currentActivity.startActivity(intent) // Reopen MainActivity
+                        }
+                        .setNegativeButton("Cancel") { dialog, _ ->
+                            // Cancel logic
+                            ActivityCompat.finishAffinity(currentActivity) // Close the app
+                        }
+                        .setCancelable(false)
+                        .create()
+                        .show()
+                }
             }
             NewClient.webSocketService.isLoggedIn
         }
