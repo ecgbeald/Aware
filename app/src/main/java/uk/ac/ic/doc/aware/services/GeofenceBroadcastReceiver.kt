@@ -1,4 +1,4 @@
-package uk.ac.ic.doc.aware.models
+package uk.ac.ic.doc.aware.services
 
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
@@ -10,13 +10,12 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Build
 import android.util.Log
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
 import uk.ac.ic.doc.aware.R
-import uk.ac.ic.doc.aware.api.GeofenceClient
+import uk.ac.ic.doc.aware.clients.GeofenceClient
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
 

@@ -40,11 +40,11 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.gson.Gson
 import com.google.maps.android.clustering.ClusterManager
-import uk.ac.ic.doc.aware.api.AwareApplication
-import uk.ac.ic.doc.aware.api.GeofenceClient
-import uk.ac.ic.doc.aware.api.GeofenceService
-import uk.ac.ic.doc.aware.api.NewClient
-import uk.ac.ic.doc.aware.api.Request
+import uk.ac.ic.doc.aware.clients.AwareApplication
+import uk.ac.ic.doc.aware.clients.GeofenceClient
+import uk.ac.ic.doc.aware.services.GeofenceService
+import uk.ac.ic.doc.aware.clients.WebSocketClient
+import uk.ac.ic.doc.aware.models.Request
 import uk.ac.ic.doc.aware.models.ClusterMarker
 import uk.ac.ic.doc.aware.models.CustomClusterRenderer
 import uk.ac.ic.doc.aware.models.CustomInfoWindow
@@ -77,7 +77,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        NewClient.webSocketService.mapActivity = this
+        WebSocketClient.webSocketService.mapActivity = this
         setContentView(R.layout.activity_map)
         if (!Places.isInitialized()) {
             Places.initialize(applicationContext, "AIzaSyDvDlocXrkrA5O7iHdN2JCrd2ynwZQXz0Y")
@@ -272,7 +272,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
         geofenceManager = GeofenceClient.geofenceClient
         setUpClusterer()
         var lastMarker: Marker? = null
-        if (NewClient.webSocketService.isLoggedIn) {
+        if (WebSocketClient.webSocketService.isLoggedIn) {
             mMap.setOnMapLongClickListener { location ->
                 lastMarker?.remove()
                 val newMarker =
@@ -414,7 +414,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
         val finalTime = firstSplit[0] + "T$timeStamp:00+" + timeZone
         val request = Request("add",title,description,location.latitude.toString(),location.longitude.toString(),priority.toString(),finalTime,timeOut.toString())
         val requestJson = Gson().toJson(request)
-        NewClient.webSocketService.webSocket.send(requestJson)
+        WebSocketClient.webSocketService.webSocket.send(requestJson)
         println(finalTime)
     }
 
@@ -432,7 +432,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
 //                "Cluster item ${item.getId()} clicked",
 //                Toast.LENGTH_SHORT
 //            ).show()
-            if (NewClient.webSocketService.isLoggedIn) {
+            if (WebSocketClient.webSocketService.isLoggedIn) {
                 mMap.setOnInfoWindowClickListener {
                     val alertDialogBuilder = AlertDialog.Builder(this)
                     val layout = layoutInflater.inflate(R.layout.new_marker_layout, null)
@@ -606,10 +606,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
         val jsonFilters = Gson().toJson(selectedItems) as String
         println(selectedItems + " <- selected items")
         val latch = CountDownLatch(1)
-        NewClient.webSocketService.latch = latch
+        WebSocketClient.webSocketService.latch = latch
         val request = Request("get",jsonFilters)
         val requestJson = Gson().toJson(request)
-        NewClient.webSocketService.webSocket.send(requestJson)
+        WebSocketClient.webSocketService.webSocket.send(requestJson)
         if (!latch.await(5, TimeUnit.SECONDS)) {
             println("Timeout")
             val currentActivity = (applicationContext as? AwareApplication)?.getCurrentActivity()
@@ -632,7 +632,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                     .show()
             }
         }
-        for (marker in NewClient.webSocketService.data) {
+        for (marker in WebSocketClient.webSocketService.data) {
             println(marker.id)
             println(marker.date)
             println(marker.title)
@@ -648,7 +648,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
             if (marker.timeout.toLong() < minuteDifference) {
                 val deleteRequest = Request("delete",marker.id.toString())
                 val deleteRequestJson = Gson().toJson(deleteRequest)
-                NewClient.webSocketService.webSocket.send(deleteRequestJson)
+                WebSocketClient.webSocketService.webSocket.send(deleteRequestJson)
                 continue
             }
             mClusterManager.addItem(
@@ -688,7 +688,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
     private fun delete(id: Int) {
         val request = Request("delete",id.toString())
         val requestJson = Gson().toJson(request)
-        NewClient.webSocketService.webSocket.send(requestJson)
+        WebSocketClient.webSocketService.webSocket.send(requestJson)
     }
 
     private fun update(
@@ -701,7 +701,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
     ) {
         val request = Request("update",title,description,severity.toString(),date,timeout.toString(),id.toString())
         val requestJson = Gson().toJson(request)
-        NewClient.webSocketService.webSocket.send(requestJson)
+        WebSocketClient.webSocketService.webSocket.send(requestJson)
     }
 
     // for the cool clock widget thingy

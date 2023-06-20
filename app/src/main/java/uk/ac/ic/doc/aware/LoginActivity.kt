@@ -7,9 +7,9 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.google.gson.Gson
-import uk.ac.ic.doc.aware.api.AwareApplication
-import uk.ac.ic.doc.aware.api.NewClient
-import uk.ac.ic.doc.aware.api.Request
+import uk.ac.ic.doc.aware.clients.AwareApplication
+import uk.ac.ic.doc.aware.clients.WebSocketClient
+import uk.ac.ic.doc.aware.models.Request
 import uk.ac.ic.doc.aware.databinding.ActivityLoginBinding
 import java.security.MessageDigest
 import java.util.concurrent.CountDownLatch
@@ -44,17 +44,17 @@ class LoginActivity : AppCompatActivity() {
         password = hashWithSalt(password, salt)
         val request = Request("create","police1",password,salt)
         val requestJson = Gson().toJson(request)
-        NewClient.webSocketService.webSocket.send(requestJson)
+        WebSocketClient.webSocketService.webSocket.send(requestJson)
     }
 
     private fun sendLoginRequest(username: String, password: String): Boolean {
         val latch = CountDownLatch(1)
-        NewClient.webSocketService.latch = latch
+        WebSocketClient.webSocketService.latch = latch
         val request = Request("getsalt",username)
         val requestJson = Gson().toJson(request)
-        NewClient.webSocketService.webSocket.send(requestJson)
+        WebSocketClient.webSocketService.webSocket.send(requestJson)
         if (!latch.await(5, TimeUnit.SECONDS)) {
-            NewClient.webSocketService.isLoggedIn = false
+            WebSocketClient.webSocketService.isLoggedIn = false
             println("Timeout")
             val currentActivity = (applicationContext as? AwareApplication)?.getCurrentActivity()
             currentActivity?.runOnUiThread {
@@ -76,18 +76,18 @@ class LoginActivity : AppCompatActivity() {
                     .show()
             }
         }
-        return if (NewClient.webSocketService.salt == "false") {
-            NewClient.webSocketService.isLoggedIn = false
-            NewClient.webSocketService.isLoggedIn
+        return if (WebSocketClient.webSocketService.salt == "false") {
+            WebSocketClient.webSocketService.isLoggedIn = false
+            WebSocketClient.webSocketService.isLoggedIn
         } else {
             val mLatch = CountDownLatch(1)
-            NewClient.webSocketService.latch = mLatch
-            val hashedPass = hashWithSalt(password,NewClient.webSocketService.salt)
+            WebSocketClient.webSocketService.latch = mLatch
+            val hashedPass = hashWithSalt(password,WebSocketClient.webSocketService.salt)
             val loginRequest = Request("login",username,hashedPass)
             val loginRequestJson = Gson().toJson(loginRequest)
-            NewClient.webSocketService.webSocket.send(loginRequestJson)
+            WebSocketClient.webSocketService.webSocket.send(loginRequestJson)
             if (!mLatch.await(5, TimeUnit.SECONDS)) {
-                NewClient.webSocketService.isLoggedIn = false
+                WebSocketClient.webSocketService.isLoggedIn = false
                 println("Timeout")
                 val currentActivity = (applicationContext as? AwareApplication)?.getCurrentActivity()
                 currentActivity?.runOnUiThread {
@@ -109,7 +109,7 @@ class LoginActivity : AppCompatActivity() {
                         .show()
                 }
             }
-            NewClient.webSocketService.isLoggedIn
+            WebSocketClient.webSocketService.isLoggedIn
         }
     }
 

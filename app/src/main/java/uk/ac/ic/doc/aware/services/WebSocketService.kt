@@ -1,4 +1,4 @@
-package uk.ac.ic.doc.aware.api
+package uk.ac.ic.doc.aware.services
 
 import android.app.AlertDialog
 import android.app.NotificationChannel
@@ -23,6 +23,7 @@ import okio.ByteString
 import uk.ac.ic.doc.aware.MainActivity
 import uk.ac.ic.doc.aware.MapActivity
 import uk.ac.ic.doc.aware.R
+import uk.ac.ic.doc.aware.clients.AwareApplication
 import java.util.concurrent.CountDownLatch
 
 

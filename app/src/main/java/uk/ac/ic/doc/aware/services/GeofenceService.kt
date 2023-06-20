@@ -1,4 +1,4 @@
-package uk.ac.ic.doc.aware.api
+package uk.ac.ic.doc.aware.services
 
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
@@ -23,7 +23,6 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.Task
 import uk.ac.ic.doc.aware.R
-import uk.ac.ic.doc.aware.models.GeofenceBroadcastReceiver
 
 class GeofenceService() : Service() {
 

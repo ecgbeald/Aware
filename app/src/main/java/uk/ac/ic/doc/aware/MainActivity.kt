@@ -14,10 +14,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
-import uk.ac.ic.doc.aware.api.GeofenceClient
-import uk.ac.ic.doc.aware.api.GeofenceService
-import uk.ac.ic.doc.aware.api.NewClient
-import uk.ac.ic.doc.aware.api.WebSocketService
+import uk.ac.ic.doc.aware.clients.GeofenceClient
+import uk.ac.ic.doc.aware.services.GeofenceService
+import uk.ac.ic.doc.aware.clients.WebSocketClient
+import uk.ac.ic.doc.aware.services.WebSocketService
 import uk.ac.ic.doc.aware.databinding.ActivityMainBinding
 import uk.ac.ic.doc.aware.models.RadiusList.radiusList
 import java.lang.NumberFormatException
@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             println("WebSocketService onServiceConnected called")
             val binder = service as WebSocketService.LocalBinder
-            NewClient.webSocketService = binder.getService()
+            WebSocketClient.webSocketService = binder.getService()
             isServiceBound = true
 
             // You can now access the WebSocket service and use its methods or variables.
@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity() {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         setContentView(binding.root)
         binding.map.setOnClickListener {
-            NewClient.webSocketService.isLoggedIn = false
+            WebSocketClient.webSocketService.isLoggedIn = false
             val intent = Intent(this, MapActivity::class.java)
             startActivity(intent)
             // no settings

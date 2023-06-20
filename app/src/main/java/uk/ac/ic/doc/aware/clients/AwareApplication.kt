@@ -1,4 +1,4 @@
-package uk.ac.ic.doc.aware.api
+package uk.ac.ic.doc.aware.clients
 
 import android.app.Activity
 import android.app.Application

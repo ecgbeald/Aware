@@ -11,7 +11,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
-        android:name="uk.ac.ic.doc.aware.api.AwareApplication"
+        android:name="uk.ac.ic.doc.aware.clients.AwareApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -21,7 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Aware"
         tools:targetApi="31">
-        <receiver android:name="uk.ac.ic.doc.aware.models.GeofenceBroadcastReceiver"/>
+        <receiver android:name="uk.ac.ic.doc.aware.services.GeofenceBroadcastReceiver"/>
         <activity
             android:name=".LoginActivity"
             android:exported="false" />
@@ -43,11 +43,11 @@
             </intent-filter>
         </activity>
         <service
-            android:name="uk.ac.ic.doc.aware.api.WebSocketService"
+            android:name="uk.ac.ic.doc.aware.services.WebSocketService"
             android:exported="false"
             android:enabled="true"/>
         <service
-            android:name="uk.ac.ic.doc.aware.api.GeofenceService"
+            android:name="uk.ac.ic.doc.aware.services.GeofenceService"
             android:exported="false"
             android:enabled="true"/>
 

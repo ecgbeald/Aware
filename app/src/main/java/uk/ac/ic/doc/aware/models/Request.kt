@@ -1,4 +1,4 @@
-package uk.ac.ic.doc.aware.api
+package uk.ac.ic.doc.aware.models
 
 data class Request(
     val type: String = "",
