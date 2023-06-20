@@ -6,8 +6,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import com.google.gson.Gson
 import uk.ac.ic.doc.aware.api.AwareApplication
 import uk.ac.ic.doc.aware.api.NewClient
+import uk.ac.ic.doc.aware.api.Request
 import uk.ac.ic.doc.aware.databinding.ActivityLoginBinding
 import java.security.MessageDigest
 import java.util.concurrent.CountDownLatch
@@ -40,13 +42,17 @@ class LoginActivity : AppCompatActivity() {
         val random = Random
         val salt = random.nextInt().toString()
         password = hashWithSalt(password, salt)
-        NewClient.webSocketService.webSocket.send("create<:>police1<:>$password<:>$salt")
+        val request = Request("create","police1",password,salt)
+        val requestJson = Gson().toJson(request)
+        NewClient.webSocketService.webSocket.send(requestJson)
     }
 
     private fun sendLoginRequest(username: String, password: String): Boolean {
         val latch = CountDownLatch(1)
         NewClient.webSocketService.latch = latch
-        NewClient.webSocketService.webSocket.send("getsalt<:>$username")
+        val request = Request("getsalt",username)
+        val requestJson = Gson().toJson(request)
+        NewClient.webSocketService.webSocket.send(requestJson)
         if (!latch.await(5, TimeUnit.SECONDS)) {
             NewClient.webSocketService.isLoggedIn = false
             println("Timeout")
@@ -77,7 +83,9 @@ class LoginActivity : AppCompatActivity() {
             val mLatch = CountDownLatch(1)
             NewClient.webSocketService.latch = mLatch
             val hashedPass = hashWithSalt(password,NewClient.webSocketService.salt)
-            NewClient.webSocketService.webSocket.send("login<:>$username<:>$hashedPass")
+            val loginRequest = Request("login",username,hashedPass)
+            val loginRequestJson = Gson().toJson(loginRequest)
+            NewClient.webSocketService.webSocket.send(loginRequestJson)
             if (!mLatch.await(5, TimeUnit.SECONDS)) {
                 NewClient.webSocketService.isLoggedIn = false
                 println("Timeout")

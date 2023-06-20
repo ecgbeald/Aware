@@ -44,6 +44,7 @@ import uk.ac.ic.doc.aware.api.AwareApplication
 import uk.ac.ic.doc.aware.api.GeofenceClient
 import uk.ac.ic.doc.aware.api.GeofenceService
 import uk.ac.ic.doc.aware.api.NewClient
+import uk.ac.ic.doc.aware.api.Request
 import uk.ac.ic.doc.aware.models.ClusterMarker
 import uk.ac.ic.doc.aware.models.CustomClusterRenderer
 import uk.ac.ic.doc.aware.models.CustomInfoWindow
@@ -411,7 +412,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
         val firstSplit = timeNow.split("T")
         val timeZone = firstSplit[1].split("+")[1]
         val finalTime = firstSplit[0] + "T$timeStamp:00+" + timeZone
-        NewClient.webSocketService.webSocket.send("add<:>" + title + "<:>" + description + "<:>" + location.latitude.toString() + "<:>" + location.longitude.toString() + "<:>" + priority.toString() + "<:>" + finalTime + "<:>" + timeOut.toString())
+        val request = Request("add",title,description,location.latitude.toString(),location.longitude.toString(),priority.toString(),finalTime,timeOut.toString())
+        val requestJson = Gson().toJson(request)
+        NewClient.webSocketService.webSocket.send(requestJson)
         println(finalTime)
     }
 
@@ -600,11 +603,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
     private fun getMarkers() {
         val idSet: Set<Int> = geofenceManager.geofenceList.map { it.requestId.toInt() }.toSet()
         val newSet: MutableSet<Int> = mutableSetOf()
-        val jsonFilters = Gson().toJson(selectedItems)
+        val jsonFilters = Gson().toJson(selectedItems) as String
         println(selectedItems + " <- selected items")
         val latch = CountDownLatch(1)
         NewClient.webSocketService.latch = latch
-        NewClient.webSocketService.webSocket.send("get<:>$jsonFilters")
+        val request = Request("get",jsonFilters)
+        val requestJson = Gson().toJson(request)
+        NewClient.webSocketService.webSocket.send(requestJson)
         if (!latch.await(5, TimeUnit.SECONDS)) {
             println("Timeout")
             val currentActivity = (applicationContext as? AwareApplication)?.getCurrentActivity()
@@ -641,7 +646,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                     minuteDifferenceConverter(marker.timeout.toLong() - minuteDifference)
                 }"
             if (marker.timeout.toLong() < minuteDifference) {
-                NewClient.webSocketService.webSocket.send("delete<:>" + marker.id)
+                val deleteRequest = Request("delete",marker.id.toString())
+                val deleteRequestJson = Gson().toJson(deleteRequest)
+                NewClient.webSocketService.webSocket.send(deleteRequestJson)
                 continue
             }
             mClusterManager.addItem(
@@ -679,7 +686,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
     }
 
     private fun delete(id: Int) {
-        NewClient.webSocketService.webSocket.send("delete<:>$id")
+        val request = Request("delete",id.toString())
+        val requestJson = Gson().toJson(request)
+        NewClient.webSocketService.webSocket.send(requestJson)
     }
 
     private fun update(
@@ -690,7 +699,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
         timeout: Int,
         id: Int
     ) {
-        NewClient.webSocketService.webSocket.send("update<:>$title<:>$description<:>$severity<:>$date<:>$timeout<:>$id")
+        val request = Request("update",title,description,severity.toString(),date,timeout.toString(),id.toString())
+        val requestJson = Gson().toJson(request)
+        NewClient.webSocketService.webSocket.send(requestJson)
     }
 
     // for the cool clock widget thingy
