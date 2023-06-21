@@ -86,12 +86,12 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, MapActivity::class.java)
             startActivity(intent)
             // no settings
-            binding.settings.visibility = View.GONE
+//            binding.settings.visibility = View.GONE
         }
         binding.login.setOnClickListener {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
-            binding.settings.visibility = View.GONE
+//            binding.settings.visibility = View.GONE
         }
         binding.settings.setOnClickListener {
             val builder = AlertDialog.Builder(this)

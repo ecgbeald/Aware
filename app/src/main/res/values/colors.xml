@@ -6,6 +6,8 @@
     <color name="colorPrimaryDark">@color/blue_1</color>
     <color name="colorAccent">@color/blue_5</color>
     <color name="transparent">#00000000</color>
+    <color name="main">#216596</color>
+    <color name="bg">#D6DCE5</color>
 
     <color name="blue_1">#00101f</color>
     <color name="blue_5">#0078ff</color>
