@@ -245,6 +245,7 @@ class MainActivity : AppCompatActivity() {
                 for (dialog in dialogsQueue.reversed()) {
                     dialog.show()
                 }
+                dialogsQueue.clear()
                 println(radiusList)
             }
             builder.setNegativeButton(android.R.string.no) { _, _ ->
