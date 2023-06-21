@@ -1,8 +1,8 @@
 package uk.ac.ic.doc.aware.services
 
-import androidx.appcompat.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -10,6 +10,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat.finishAffinity
 import androidx.core.app.NotificationCompat
 import com.google.gson.Gson
@@ -70,10 +71,14 @@ class WebSocketService: Service() {
             NotificationManager.IMPORTANCE_NONE
         val channel = NotificationChannel(channelId, channelName, channelImportance)
 
+        val intentAction = Intent(this, StopServerBroadcast::class.java)
+        val pIntent = PendingIntent.getBroadcast(this,1,intentAction,PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE);
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
             .setContentTitle("Aware")
             .setContentText("Running in the background")
             .setSmallIcon(R.drawable.notif)
+            .addAction(R.drawable.aware, "On/off", pIntent)
+            .setOngoing(true)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -141,6 +146,7 @@ class WebSocketService: Service() {
                         val intent = Intent(currentActivity, MainActivity::class.java)
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                         currentActivity.startActivity(intent) // Reopen MainActivity
+                        currentActivity.finish()
                     }
                     .setNegativeButton("Cancel") { dialog, _ ->
                         // Cancel logic

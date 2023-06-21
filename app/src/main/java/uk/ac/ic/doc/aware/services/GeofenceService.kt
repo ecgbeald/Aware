@@ -70,10 +70,14 @@ class GeofenceService() : Service() {
             NotificationManager.IMPORTANCE_NONE
         val channel = NotificationChannel(channelId, channelName, channelImportance)
 
+        val intentAction = Intent(this, StopServerBroadcast::class.java)
+        val pIntent = PendingIntent.getBroadcast(this,1,intentAction,PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE);
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
             .setContentTitle("Aware")
-            .setContentText("Running in the background")
+            .setContentText("Running in the background, tap to quit")
             .setSmallIcon(R.drawable.notif)
+            .addAction(R.drawable.aware, "Quit", pIntent)
+            .setOngoing(true)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

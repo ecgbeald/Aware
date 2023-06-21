@@ -33,6 +33,7 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this@LoginActivity, "Long press to add alert", Toast.LENGTH_SHORT).show()
                 val intent = Intent(this, MapActivity::class.java)
                 startActivity(intent)
+                finish()
             } else {
                 Toast.makeText(this@LoginActivity, "Wrong username or password", Toast.LENGTH_SHORT).show()
             }
@@ -68,6 +69,7 @@ class LoginActivity : AppCompatActivity() {
                         val intent = Intent(currentActivity, MainActivity::class.java)
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                         currentActivity.startActivity(intent) // Reopen MainActivity
+                        finish();
                     }
                     .setNegativeButton("Cancel") { dialog, _ ->
                         // Cancel logic
@@ -101,6 +103,7 @@ class LoginActivity : AppCompatActivity() {
                             val intent = Intent(currentActivity, MainActivity::class.java)
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                             currentActivity.startActivity(intent) // Reopen MainActivity
+                            finish();
                         }
                         .setNegativeButton("Cancel") { dialog, _ ->
                             // Cancel logic

@@ -83,12 +83,14 @@ class MainActivity : AppCompatActivity() {
         binding.map.setOnClickListener {
             val intent = Intent(this, MapActivity::class.java)
             startActivity(intent)
+            finish();
             // no settings
 //            binding.settings.visibility = View.GONE
         }
         binding.login.setOnClickListener {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
+            finish();
 //            binding.settings.visibility = View.GONE
         }
 //        binding.settings.setOnClickListener {

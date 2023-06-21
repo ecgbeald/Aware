@@ -787,6 +787,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                         val intent = Intent(currentActivity, MainActivity::class.java)
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                         currentActivity.startActivity(intent) // Reopen MainActivity
+                        finish();
                     }
                     .setNegativeButton("Cancel") { dialog, _ ->
                         // Cancel logic
