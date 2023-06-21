@@ -49,6 +49,7 @@ import uk.ac.ic.doc.aware.models.Request
 import uk.ac.ic.doc.aware.models.ClusterMarker
 import uk.ac.ic.doc.aware.models.CustomClusterRenderer
 import uk.ac.ic.doc.aware.models.CustomInfoWindow
+import uk.ac.ic.doc.aware.models.LoginStatus
 import uk.ac.ic.doc.aware.models.PermissionUtils
 import uk.ac.ic.doc.aware.models.PermissionUtils.PermissionDeniedDialog.Companion.newInstance
 import uk.ac.ic.doc.aware.models.RadiusList.radiusList
@@ -435,7 +436,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
         geofenceManager = GeofenceClient.geofenceClient
         setUpClusterer()
         var lastMarker: Marker? = null
-        if (WebSocketClient.webSocketService.isLoggedIn) {
+        if (LoginStatus.isLoggedIn) {
             mMap.setOnMapLongClickListener { location ->
                 lastMarker?.remove()
                 val newMarker =
@@ -596,7 +597,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
 //                "Cluster item ${item.getId()} clicked",
 //                Toast.LENGTH_SHORT
 //            ).show()
-            if (WebSocketClient.webSocketService.isLoggedIn) {
+            if (LoginStatus.isLoggedIn) {
                 mMap.setOnInfoWindowClickListener {
                     val alertDialogBuilder = AlertDialog.Builder(this,R.style.CustomAlertDialog)
                     val layout = layoutInflater.inflate(R.layout.new_marker_layout, null)

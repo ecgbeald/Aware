@@ -24,6 +24,7 @@ import uk.ac.ic.doc.aware.MainActivity
 import uk.ac.ic.doc.aware.MapActivity
 import uk.ac.ic.doc.aware.R
 import uk.ac.ic.doc.aware.clients.AwareApplication
+import uk.ac.ic.doc.aware.models.LoginStatus
 import java.util.concurrent.CountDownLatch
 
 
@@ -32,7 +33,6 @@ class WebSocketService: Service() {
     lateinit var latch: CountDownLatch
     lateinit var data: List<MyData>
     lateinit var mapActivity: MapActivity
-    var isLoggedIn = false
     lateinit var salt: String
     private var awareApplication: AwareApplication? = null
 
@@ -97,10 +97,10 @@ class WebSocketService: Service() {
                     mapActivity.refreshMarkers()
                 }
             } else if (text == "true") {
-                isLoggedIn = true
+                LoginStatus.isLoggedIn = true
                 latch.countDown()
             } else if (text == "false") {
-                isLoggedIn = false
+                LoginStatus.isLoggedIn = false
                 latch.countDown()
             } else if (text.contains("salt ")) {
                 val res = text.split(" ")

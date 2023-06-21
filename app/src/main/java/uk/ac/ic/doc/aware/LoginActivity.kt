@@ -11,6 +11,7 @@ import uk.ac.ic.doc.aware.clients.AwareApplication
 import uk.ac.ic.doc.aware.clients.WebSocketClient
 import uk.ac.ic.doc.aware.models.Request
 import uk.ac.ic.doc.aware.databinding.ActivityLoginBinding
+import uk.ac.ic.doc.aware.models.LoginStatus
 import java.security.MessageDigest
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -55,7 +56,7 @@ class LoginActivity : AppCompatActivity() {
         val requestJson = Gson().toJson(request)
         WebSocketClient.webSocketService.webSocket.send(requestJson)
         if (!latch.await(5, TimeUnit.SECONDS)) {
-            WebSocketClient.webSocketService.isLoggedIn = false
+            LoginStatus.isLoggedIn = false
             println("Timeout")
             val currentActivity = (applicationContext as? AwareApplication)?.getCurrentActivity()
             currentActivity?.runOnUiThread {
@@ -78,8 +79,8 @@ class LoginActivity : AppCompatActivity() {
             }
         }
         return if (WebSocketClient.webSocketService.salt == "false") {
-            WebSocketClient.webSocketService.isLoggedIn = false
-            WebSocketClient.webSocketService.isLoggedIn
+            LoginStatus.isLoggedIn = false
+            LoginStatus.isLoggedIn
         } else {
             val mLatch = CountDownLatch(1)
             WebSocketClient.webSocketService.latch = mLatch
@@ -88,7 +89,7 @@ class LoginActivity : AppCompatActivity() {
             val loginRequestJson = Gson().toJson(loginRequest)
             WebSocketClient.webSocketService.webSocket.send(loginRequestJson)
             if (!mLatch.await(5, TimeUnit.SECONDS)) {
-                WebSocketClient.webSocketService.isLoggedIn = false
+                LoginStatus.isLoggedIn = false
                 println("Timeout")
                 val currentActivity = (applicationContext as? AwareApplication)?.getCurrentActivity()
                 currentActivity?.runOnUiThread {
@@ -110,7 +111,7 @@ class LoginActivity : AppCompatActivity() {
                         .show()
                 }
             }
-            WebSocketClient.webSocketService.isLoggedIn
+            LoginStatus.isLoggedIn
         }
     }
 

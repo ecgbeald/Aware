@@ -19,6 +19,7 @@ import uk.ac.ic.doc.aware.services.GeofenceService
 import uk.ac.ic.doc.aware.clients.WebSocketClient
 import uk.ac.ic.doc.aware.services.WebSocketService
 import uk.ac.ic.doc.aware.databinding.ActivityMainBinding
+import uk.ac.ic.doc.aware.models.LoginStatus
 import uk.ac.ic.doc.aware.models.RadiusList.radiusList
 import java.lang.NumberFormatException
 
@@ -80,7 +81,6 @@ class MainActivity : AppCompatActivity() {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         setContentView(binding.root)
         binding.map.setOnClickListener {
-            WebSocketClient.webSocketService.isLoggedIn = false
             val intent = Intent(this, MapActivity::class.java)
             startActivity(intent)
             // no settings

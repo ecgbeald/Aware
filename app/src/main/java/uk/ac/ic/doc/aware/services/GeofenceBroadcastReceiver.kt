@@ -3,6 +3,7 @@ package uk.ac.ic.doc.aware.services
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -14,6 +15,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
+import uk.ac.ic.doc.aware.MapActivity
 import uk.ac.ic.doc.aware.R
 import uk.ac.ic.doc.aware.clients.GeofenceClient
 
@@ -63,6 +65,15 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
     private fun sendNotification(context: Context, message: String, severity: Int, id: Int) {
         createNotificationChannel(context)
 
+        val intent = Intent(context, MapActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.notif)
             .setLargeIcon(BitmapFactory.decodeResource(context.resources, ICONS[severity]))
@@ -71,6 +82,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             .setColor(Color.BLUE)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
 
         val notificationManager = NotificationManagerCompat.from(context)
         notificationManager.notify(id, notificationBuilder.build())
