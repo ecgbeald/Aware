@@ -54,6 +54,12 @@ class GeofenceService() : Service() {
         awareApplication = applicationContext as? AwareApplication
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        this.stopForeground(Service.STOP_FOREGROUND_REMOVE)
+
+    }
+
     override fun onBind(intent: Intent?): IBinder? {
         return binder
     }

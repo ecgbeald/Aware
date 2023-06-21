@@ -22,6 +22,7 @@ import uk.ac.ic.doc.aware.services.WebSocketService
 import uk.ac.ic.doc.aware.databinding.ActivityMainBinding
 import uk.ac.ic.doc.aware.models.LoginStatus
 import uk.ac.ic.doc.aware.models.RadiusList.radiusList
+import java.lang.IllegalArgumentException
 import java.lang.NumberFormatException
 
 
@@ -80,13 +81,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         if (intent.getBooleanExtra("EXIT", false)) {
-            println("EXITING")
             val webSocketService = Intent(this, WebSocketService::class.java)
             val geofenceService = Intent(this, GeofenceService::class.java)
-            this.applicationContext.stopService(webSocketService)
-            this.applicationContext.stopService(geofenceService)
+            stopService(webSocketService)
+            stopService(geofenceService)
             println("FINISHING")
             finishAffinity();
+            System.exit(0)
+            return
         }
         binding = ActivityMainBinding.inflate(layoutInflater)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
@@ -102,6 +104,23 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
 //            binding.settings.visibility = View.GONE
         }
+        val serviceIntent = Intent(this, WebSocketService::class.java)
+        ContextCompat.startForegroundService(this, serviceIntent)
+        applicationContext.bindService(
+            Intent(this, WebSocketService::class.java),
+            serviceConnection,
+            Context.BIND_AUTO_CREATE
+        )
+        println("service 1 started")
+        val serviceIntent2 = Intent(this, GeofenceService::class.java)
+        ContextCompat.startForegroundService(this, serviceIntent2)
+        applicationContext.bindService(
+            Intent(this, GeofenceService::class.java),
+            serviceConnection2,
+            Context.BIND_AUTO_CREATE
+        )
+        println("service 2 started")
+
 //        binding.settings.setOnClickListener {
 //            val builder = AlertDialog.Builder(this,R.style.CustomAlertDialog)
 //            val layout = layoutInflater.inflate(R.layout.settings_dialog, null)
@@ -261,20 +280,6 @@ class MainActivity : AppCompatActivity() {
 //            }
 //            builder.show()
 //        }
-        val serviceIntent = Intent(this, WebSocketService::class.java)
-        ContextCompat.startForegroundService(this, serviceIntent)
-        applicationContext.bindService(
-            Intent(this, WebSocketService::class.java),
-            serviceConnection,
-            Context.BIND_AUTO_CREATE
-        )
-        val serviceIntent2 = Intent(this, GeofenceService::class.java)
-        ContextCompat.startForegroundService(this, serviceIntent2)
-        applicationContext.bindService(
-            Intent(this, GeofenceService::class.java),
-            serviceConnection2,
-            Context.BIND_AUTO_CREATE
-        )
 
     }
 }

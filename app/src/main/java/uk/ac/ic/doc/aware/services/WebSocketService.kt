@@ -174,6 +174,9 @@ class WebSocketService: Service() {
         if (::webSocket.isInitialized) {
             webSocket.close(1000, "Service destroyed")
         }
+        println("DESTROYED")
+        stopForeground(Service.STOP_FOREGROUND_REMOVE)
+        stopSelf()
     }
 
     data class MyData(

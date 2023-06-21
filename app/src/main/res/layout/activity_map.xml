@@ -71,20 +71,34 @@
         app:srcCompat="@drawable/landmark_120"
         android:contentDescription="an attraction button" />
 
-    <ImageButton
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:background="@android:color/transparent"
-        android:id="@+id/settings"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="end"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
-        android:layout_marginTop="110dp"
-        android:layout_marginStart="340dp"
-        app:srcCompat="@drawable/settings"
-        android:contentDescription="cogs" />
+        app:layout_constraintTop_toTopOf="parent">
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <ImageButton
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:background="@android:color/transparent"
+            android:id="@+id/settings"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="110dp"
+            android:layout_marginEnd="10dp"
+            app:srcCompat="@drawable/settings"
+            android:contentDescription="cogs" />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
