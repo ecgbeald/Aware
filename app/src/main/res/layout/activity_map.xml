@@ -84,7 +84,6 @@
         app:layout_constraintVertical_bias="0.0"
         android:layout_marginTop="110dp"
         android:layout_marginStart="340dp"
-        android:layout_marginRight=""
         app:srcCompat="@drawable/settings"
         android:contentDescription="cogs" />
 
