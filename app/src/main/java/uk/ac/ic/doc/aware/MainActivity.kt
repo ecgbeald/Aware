@@ -27,10 +27,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private var isServiceBound = false
-    private val dialogsQueue = ArrayList<AlertDialog.Builder>()
+//    private val dialogsQueue = ArrayList<AlertDialog.Builder>()
     private val serviceConnection = object : ServiceConnection {
 
-        lateinit var mapActivity: MapActivity
 
         override fun onNullBinding(name: ComponentName?) {
             super.onNullBinding(name)
@@ -62,7 +61,6 @@ class MainActivity : AppCompatActivity() {
             println("GeoFence onServiceConnected called")
             val binder = service as GeofenceService.LocalBinder
             GeofenceClient.geofenceClient = binder.getService()
-            GeofenceClient.geofenceClient.context = this@MainActivity
             GeofenceClient.geofenceClient.geofencingClient =
                 LocationServices.getGeofencingClient(this@MainActivity)
             isServiceBound = true
@@ -93,165 +91,165 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
 //            binding.settings.visibility = View.GONE
         }
-        binding.settings.setOnClickListener {
-            val builder = AlertDialog.Builder(this,R.style.CustomAlertDialog)
-            val layout = layoutInflater.inflate(R.layout.settings_dialog, null)
-            builder.setView(layout)
-            builder.setTitle("Settings for Radius")
-            builder.setPositiveButton(android.R.string.yes) { _, _ ->
-                val theftField = layout.findViewById<EditText>(R.id.theft_radius)
-                val antiField = layout.findViewById<EditText>(R.id.anti_radius)
-                val roadField = layout.findViewById<EditText>(R.id.road_radius)
-                val majorField = layout.findViewById<EditText>(R.id.major_radius)
-                val theftRadiusStr = theftField.text.toString()
-                val antiRadiusStr = antiField.text.toString()
-                val roadRadiusStr = roadField.text.toString()
-                val majorRadiusStr = majorField.text.toString()
-                if (theftRadiusStr.isNotEmpty()) {
-                    var theftRadius = 100
-                    try {
-                        theftRadius = theftRadiusStr.toInt()
-                    } catch (nfe: NumberFormatException) {
-                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
-                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Thieving</b> alerts is too high, a radius of less than <b>2km</b> is recommended."))
-                        builder1.setCancelable(false)
-                        builder1.setNegativeButton("OK") { _, _ ->
-                        }
-                        dialogsQueue.add(builder1)
-                    }
-                    if (theftRadius < 100) {
-                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
-                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Thieving</b> alerts is too low, a radius of at least <b>100m</b> is needed."))
-                        builder1.setCancelable(false)
-                        builder1.setNegativeButton(android.R.string.no) { _, _ ->
-                        }
-                        dialogsQueue.add(builder1)
-                    } else if (theftRadius >= 2000) {
-                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
-                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Thieving</b> alerts is too high, a radius of less than <b>2km</b> is recommended."))
-                        builder1.setCancelable(false)
-                        builder1.setNegativeButton("OK") { _, _ ->
-                        }
-                        dialogsQueue.add(builder1)
-                    } else {
-                        radiusList[0] = theftRadius
-                    }
-                } else {
-                    radiusList[0] = 100
-                }
-                if (antiRadiusStr.isNotEmpty()) {
-                    var antiRadius = 200
-                    try {
-                        antiRadius = antiRadiusStr.toInt()
-                    } catch (nfe: NumberFormatException) {
-                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
-                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Anti Social Behaviour</b> alerts too high, a radius of less than <b>2km</b> is recommended."))
-                        builder1.setCancelable(false)
-                        builder1.setNegativeButton("OK") { _, _ ->
-                        }
-                        dialogsQueue.add(builder1)
-                    }
-                    if (antiRadius < 100) {
-                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
-                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Anti Social Behaviour</b> alerts is too low, a radius of at least <b>100m</b> is needed."))
-                        builder1.setCancelable(false)
-                        builder1.setNegativeButton("OK") { _, _ ->
-                        }
-                        dialogsQueue.add(builder1)
-                    } else if (antiRadius >= 2000) {
-                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
-                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Anti Social Behaviour</b> alerts too high, a radius of less than <b>2km</b> is recommended."))
-                        builder1.setCancelable(false)
-                        builder1.setNegativeButton("OK") { _, _ ->
-                        }
-                        dialogsQueue.add(builder1)
-                    } else {
-                        radiusList[1] = antiRadius
-                    }
-                } else {
-                    radiusList[1] = 200
-                }
-                if (roadRadiusStr.isNotEmpty()) {
-                    var roadRadius = 300
-                    try {
-                        roadRadius = roadRadiusStr.toInt()
-                    } catch (nfe: NumberFormatException) {
-                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
-                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Travel Disruption</b> alerts too high, a radius of less than <b>2km</b> is recommended."))
-                        builder1.setCancelable(false)
-                        builder1.setNegativeButton("OK") { _, _ ->
-                        }
-                        dialogsQueue.add(builder1)
-                    }
-                    if (roadRadius < 100) {
-                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
-                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Travel Disruption</b> alerts is too low, a radius of at least <b>100m</b> is needed."))
-                        builder1.setCancelable(false)
-                        builder1.setNegativeButton("OK") { _, _ ->
-                        }
-                        dialogsQueue.add(builder1)
-                    } else if (roadRadius >= 2000) {
-                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
-                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Travel Disruption</b> alerts too high, a radius of less than <b>2km</b> is recommended."))
-                        builder1.setCancelable(false)
-                        builder1.setNegativeButton("OK") { _, _ ->
-                        }
-                        dialogsQueue.add(builder1)
-                    } else {
-                        radiusList[2] = roadRadius
-                    }
-                } else {
-                    radiusList[2] = 300
-                }
-                if (majorRadiusStr.isNotEmpty()) {
-                    var majorRadius = 400
-                    try {
-                        majorRadius = majorRadiusStr.toInt()
-                    } catch (nfe: NumberFormatException) {
-                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
-                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Major Disruption</b> alerts is too high, a radius of less than <b>2km</b> is recommended."))
-                        builder1.setCancelable(false)
-                        builder1.setNegativeButton("OK") { _, _ ->
-                        }
-                        dialogsQueue.add(builder1)
-                    }
-                    if (majorRadius < 100) {
-                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
-                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Major Disruption</b> alerts is too low, a radius of at least <b>100m</b> is needed."))
-                        builder1.setCancelable(false)
-                        builder1.setNegativeButton("OK") { _, _ ->
-                        }
-                        dialogsQueue.add(builder1)
-                    } else if (majorRadius >= 2000) {
-                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
-                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Major Disruption</b> alerts is too high, a radius of less than <b>2km</b> is recommended."))
-                        builder1.setCancelable(false)
-                        builder1.setNegativeButton("OK") { _, _ ->
-                        }
-                        dialogsQueue.add(builder1)
-                    } else {
-                        radiusList[3] = majorRadius
-                    }
-                } else {
-                    radiusList[3] = 400
-                }
-                val confirmationDialog = AlertDialog.Builder(this,R.style.CustomAlertDialog).setTitle("Confirmation")
-                    .setMessage(
-                        "Radius for Thieving Activity: ${radiusList[0]}m\nRadius for Anti Social Behaviour: ${radiusList[1]}m\n" +
-                                "Radius for Travel Disruptions: ${radiusList[2]}m\nRadius for Major Incidences: ${radiusList[3]}m"
-                    )
-                    .setPositiveButton("OK") { _, _ -> }
-                confirmationDialog.show()
-                for (dialog in dialogsQueue.reversed()) {
-                    dialog.show()
-                }
-                dialogsQueue.clear()
-                println(radiusList)
-            }
-            builder.setNegativeButton(android.R.string.no) { _, _ ->
-            }
-            builder.show()
-        }
+//        binding.settings.setOnClickListener {
+//            val builder = AlertDialog.Builder(this,R.style.CustomAlertDialog)
+//            val layout = layoutInflater.inflate(R.layout.settings_dialog, null)
+//            builder.setView(layout)
+//            builder.setTitle("Settings for Radius")
+//            builder.setPositiveButton(android.R.string.yes) { _, _ ->
+//                val theftField = layout.findViewById<EditText>(R.id.theft_radius)
+//                val antiField = layout.findViewById<EditText>(R.id.anti_radius)
+//                val roadField = layout.findViewById<EditText>(R.id.road_radius)
+//                val majorField = layout.findViewById<EditText>(R.id.major_radius)
+//                val theftRadiusStr = theftField.text.toString()
+//                val antiRadiusStr = antiField.text.toString()
+//                val roadRadiusStr = roadField.text.toString()
+//                val majorRadiusStr = majorField.text.toString()
+//                if (theftRadiusStr.isNotEmpty()) {
+//                    var theftRadius = 100
+//                    try {
+//                        theftRadius = theftRadiusStr.toInt()
+//                    } catch (nfe: NumberFormatException) {
+//                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
+//                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Thieving</b> alerts is too high, a radius of less than <b>2km</b> is recommended."))
+//                        builder1.setCancelable(false)
+//                        builder1.setNegativeButton("OK") { _, _ ->
+//                        }
+//                        dialogsQueue.add(builder1)
+//                    }
+//                    if (theftRadius < 100) {
+//                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
+//                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Thieving</b> alerts is too low, a radius of at least <b>100m</b> is needed."))
+//                        builder1.setCancelable(false)
+//                        builder1.setNegativeButton(android.R.string.no) { _, _ ->
+//                        }
+//                        dialogsQueue.add(builder1)
+//                    } else if (theftRadius >= 2000) {
+//                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
+//                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Thieving</b> alerts is too high, a radius of less than <b>2km</b> is recommended."))
+//                        builder1.setCancelable(false)
+//                        builder1.setNegativeButton("OK") { _, _ ->
+//                        }
+//                        dialogsQueue.add(builder1)
+//                    } else {
+//                        radiusList[0] = theftRadius
+//                    }
+//                } else {
+//                    radiusList[0] = 100
+//                }
+//                if (antiRadiusStr.isNotEmpty()) {
+//                    var antiRadius = 200
+//                    try {
+//                        antiRadius = antiRadiusStr.toInt()
+//                    } catch (nfe: NumberFormatException) {
+//                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
+//                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Anti Social Behaviour</b> alerts too high, a radius of less than <b>2km</b> is recommended."))
+//                        builder1.setCancelable(false)
+//                        builder1.setNegativeButton("OK") { _, _ ->
+//                        }
+//                        dialogsQueue.add(builder1)
+//                    }
+//                    if (antiRadius < 100) {
+//                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
+//                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Anti Social Behaviour</b> alerts is too low, a radius of at least <b>100m</b> is needed."))
+//                        builder1.setCancelable(false)
+//                        builder1.setNegativeButton("OK") { _, _ ->
+//                        }
+//                        dialogsQueue.add(builder1)
+//                    } else if (antiRadius >= 2000) {
+//                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
+//                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Anti Social Behaviour</b> alerts too high, a radius of less than <b>2km</b> is recommended."))
+//                        builder1.setCancelable(false)
+//                        builder1.setNegativeButton("OK") { _, _ ->
+//                        }
+//                        dialogsQueue.add(builder1)
+//                    } else {
+//                        radiusList[1] = antiRadius
+//                    }
+//                } else {
+//                    radiusList[1] = 200
+//                }
+//                if (roadRadiusStr.isNotEmpty()) {
+//                    var roadRadius = 300
+//                    try {
+//                        roadRadius = roadRadiusStr.toInt()
+//                    } catch (nfe: NumberFormatException) {
+//                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
+//                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Travel Disruption</b> alerts too high, a radius of less than <b>2km</b> is recommended."))
+//                        builder1.setCancelable(false)
+//                        builder1.setNegativeButton("OK") { _, _ ->
+//                        }
+//                        dialogsQueue.add(builder1)
+//                    }
+//                    if (roadRadius < 100) {
+//                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
+//                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Travel Disruption</b> alerts is too low, a radius of at least <b>100m</b> is needed."))
+//                        builder1.setCancelable(false)
+//                        builder1.setNegativeButton("OK") { _, _ ->
+//                        }
+//                        dialogsQueue.add(builder1)
+//                    } else if (roadRadius >= 2000) {
+//                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
+//                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Travel Disruption</b> alerts too high, a radius of less than <b>2km</b> is recommended."))
+//                        builder1.setCancelable(false)
+//                        builder1.setNegativeButton("OK") { _, _ ->
+//                        }
+//                        dialogsQueue.add(builder1)
+//                    } else {
+//                        radiusList[2] = roadRadius
+//                    }
+//                } else {
+//                    radiusList[2] = 300
+//                }
+//                if (majorRadiusStr.isNotEmpty()) {
+//                    var majorRadius = 400
+//                    try {
+//                        majorRadius = majorRadiusStr.toInt()
+//                    } catch (nfe: NumberFormatException) {
+//                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
+//                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Major Disruption</b> alerts is too high, a radius of less than <b>2km</b> is recommended."))
+//                        builder1.setCancelable(false)
+//                        builder1.setNegativeButton("OK") { _, _ ->
+//                        }
+//                        dialogsQueue.add(builder1)
+//                    }
+//                    if (majorRadius < 100) {
+//                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
+//                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Major Disruption</b> alerts is too low, a radius of at least <b>100m</b> is needed."))
+//                        builder1.setCancelable(false)
+//                        builder1.setNegativeButton("OK") { _, _ ->
+//                        }
+//                        dialogsQueue.add(builder1)
+//                    } else if (majorRadius >= 2000) {
+//                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
+//                        builder1.setMessage(Html.fromHtml("Radius setting for <b>Major Disruption</b> alerts is too high, a radius of less than <b>2km</b> is recommended."))
+//                        builder1.setCancelable(false)
+//                        builder1.setNegativeButton("OK") { _, _ ->
+//                        }
+//                        dialogsQueue.add(builder1)
+//                    } else {
+//                        radiusList[3] = majorRadius
+//                    }
+//                } else {
+//                    radiusList[3] = 400
+//                }
+//                val confirmationDialog = AlertDialog.Builder(this,R.style.CustomAlertDialog).setTitle("Confirmation")
+//                    .setMessage(
+//                        "Radius for Thieving Activity: ${radiusList[0]}m\nRadius for Anti Social Behaviour: ${radiusList[1]}m\n" +
+//                                "Radius for Travel Disruptions: ${radiusList[2]}m\nRadius for Major Incidences: ${radiusList[3]}m"
+//                    )
+//                    .setPositiveButton("OK") { _, _ -> }
+//                confirmationDialog.show()
+//                for (dialog in dialogsQueue.reversed()) {
+//                    dialog.show()
+//                }
+//                dialogsQueue.clear()
+//                println(radiusList)
+//            }
+//            builder.setNegativeButton(android.R.string.no) { _, _ ->
+//            }
+//            builder.show()
+//        }
         val serviceIntent = Intent(this, WebSocketService::class.java)
         ContextCompat.startForegroundService(this, serviceIntent)
         applicationContext.bindService(

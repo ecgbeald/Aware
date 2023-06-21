@@ -71,4 +71,20 @@
         app:srcCompat="@drawable/landmark_120"
         android:contentDescription="an attraction button" />
 
+    <ImageButton
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@android:color/transparent"
+        android:id="@+id/settings"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        android:layout_marginTop="98dp"
+        android:layout_marginLeft="6dp"
+        app:srcCompat="@drawable/settings"
+        android:contentDescription="cogs" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

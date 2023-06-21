@@ -23,11 +23,11 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.Task
 import uk.ac.ic.doc.aware.R
+import uk.ac.ic.doc.aware.models.RadiusList
 
 class GeofenceService() : Service() {
 
     private val TAG = "GeofenceManager"
-    lateinit var context : Context
     lateinit var geofencingClient: GeofencingClient
 
     lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -105,9 +105,9 @@ class GeofenceService() : Service() {
             .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
             .build()
 
-        val intent = Intent(context, GeofenceBroadcastReceiver::class.java)
+        val intent = Intent(applicationContext, GeofenceBroadcastReceiver::class.java)
         geofencePendingIntent = PendingIntent.getBroadcast(
-            context,
+            applicationContext,
             0,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
@@ -169,10 +169,10 @@ class GeofenceService() : Service() {
     }
 
     @SuppressLint("MissingPermission")
-    fun addSingleGeofence(geofenceId: String, latitude: Double, longitude: Double, radius: Float, timeout: Long) {
+    fun addSingleGeofence(geofenceId: String, latitude: Double, longitude: Double, timeout: Long, severity: Int) {
         val geofence = Geofence.Builder()
             .setRequestId(geofenceId)
-            .setCircularRegion(latitude, longitude, radius)
+            .setCircularRegion(latitude, longitude, RadiusList.radiusList[severity].toFloat())
             .setExpirationDuration(timeout*60*1000 - 100)
             .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
             .build()
@@ -184,9 +184,9 @@ class GeofenceService() : Service() {
             .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
             .build()
 
-        val intent = Intent(context, GeofenceBroadcastReceiver::class.java)
+        val intent = Intent(applicationContext, GeofenceBroadcastReceiver::class.java)
         geofencePendingIntent = PendingIntent.getBroadcast(
-            context,
+            applicationContext,
             0,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
@@ -194,6 +194,9 @@ class GeofenceService() : Service() {
 
         geofencingClient.addGeofences(geofencingRequest,geofencePendingIntent as PendingIntent)
         geofenceList.add(geofence)
+        geofenceMap[geofenceId] =
+            Pair(severity, RadiusList.radiusList[severity].toFloat())
+
     }
 
     fun removeGeofence(id : String) {
@@ -211,6 +214,32 @@ class GeofenceService() : Service() {
             .addOnFailureListener { exception ->
                 Log.e(TAG, "Error removing geofence: ${exception.localizedMessage}")
             }
+    }
+
+    fun updateGeofenceRadius(id: String) {
+        val geofence = geofenceList.find { it.requestId == id }
+        println(geofenceList)
+
+            geofencingClient.removeGeofences(listOf(id)) .addOnSuccessListener {
+                val copy : MutableList<Geofence> = mutableListOf()
+                copy.addAll(geofenceList)
+
+                for (g in copy) {
+                    if (g.requestId == id) {
+                        geofenceList.remove(g)
+                    }
+                }
+
+                geofenceMap[geofence!!.requestId]?.let { it1 ->
+                    addSingleGeofence(
+                        geofence.requestId,geofence.latitude,geofence.longitude,(geofence.expirationTime + 100)/(60*1000),
+                        it1.first)
+                }
+            }
+                .addOnFailureListener { exception ->
+                    Log.e(TAG, "Error removing geofence: ${exception.localizedMessage}")
+                }
+        println(geofenceList)
     }
 
 }
