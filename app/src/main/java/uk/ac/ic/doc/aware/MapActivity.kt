@@ -102,7 +102,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
             }
 
             override fun onPlaceSelected(place: Place) {
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.latLng!!, 15f))
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.latLng!!, 18f))
             }
         })
         val mapFragment = supportFragmentManager.findFragmentById(R.id.maps) as SupportMapFragment
