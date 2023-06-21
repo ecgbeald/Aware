@@ -114,7 +114,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
             for (index in selectedItems) {
                 checkedItems[index] = true
             }
-            val builder = AlertDialog.Builder(this)
+            val builder = AlertDialog.Builder(this,R.style.CustomAlertDialog)
             builder.setTitle("Filter Events")
             builder.setMultiChoiceItems(listItems, checkedItems) { _, which, isChecked ->
                 checkedItems[which] = isChecked
@@ -281,7 +281,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
                 newMarker!!.showInfoWindow()
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
                 mMap.setOnInfoWindowClickListener {
-                    val alertDialogBuilder = AlertDialog.Builder(this)
+                    val alertDialogBuilder = AlertDialog.Builder(this, R.style.CustomAlertDialog)
                     val layout = layoutInflater.inflate(R.layout.new_marker_layout, null)
                     alertDialogBuilder.setView(layout)
                     val timeTextBox = layout.findViewById<Button>(R.id.dateBox)

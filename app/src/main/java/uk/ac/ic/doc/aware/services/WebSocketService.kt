@@ -133,7 +133,7 @@ class WebSocketService: Service() {
 
             val currentActivity = (applicationContext as? AwareApplication)?.getCurrentActivity()
             currentActivity?.runOnUiThread {
-                val dialogBuilder = AlertDialog.Builder(currentActivity)
+                val dialogBuilder = AlertDialog.Builder(currentActivity, R.style.CustomAlertDialog)
                 dialogBuilder.setMessage("Connection failure. Retry?")
                     .setPositiveButton("Retry") { dialog, _ ->
                         // Retry logic

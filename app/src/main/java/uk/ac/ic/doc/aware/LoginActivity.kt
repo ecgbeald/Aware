@@ -29,6 +29,7 @@ class LoginActivity : AppCompatActivity() {
             val result = sendLoginRequest(username, binding.txtPass.text.toString())
             if (result) {
                 Toast.makeText(this@LoginActivity, "Welcome: $username", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@LoginActivity, "Long press to add alert", Toast.LENGTH_SHORT).show()
                 val intent = Intent(this, MapActivity::class.java)
                 startActivity(intent)
             } else {
@@ -58,7 +59,7 @@ class LoginActivity : AppCompatActivity() {
             println("Timeout")
             val currentActivity = (applicationContext as? AwareApplication)?.getCurrentActivity()
             currentActivity?.runOnUiThread {
-                val dialogBuilder = AlertDialog.Builder(currentActivity)
+                val dialogBuilder = AlertDialog.Builder(currentActivity,R.style.CustomAlertDialog)
                 dialogBuilder.setMessage("Connection failure. Retry?")
                     .setPositiveButton("Retry") { dialog, _ ->
                         // Retry logic
@@ -91,7 +92,7 @@ class LoginActivity : AppCompatActivity() {
                 println("Timeout")
                 val currentActivity = (applicationContext as? AwareApplication)?.getCurrentActivity()
                 currentActivity?.runOnUiThread {
-                    val dialogBuilder = AlertDialog.Builder(currentActivity)
+                    val dialogBuilder = AlertDialog.Builder(currentActivity,R.style.CustomAlertDialog)
                     dialogBuilder.setMessage("Connection failure. Retry?")
                         .setPositiveButton("Retry") { dialog, _ ->
                             // Retry logic

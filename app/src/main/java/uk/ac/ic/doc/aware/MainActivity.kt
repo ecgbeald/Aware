@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity() {
 //            binding.settings.visibility = View.GONE
         }
         binding.settings.setOnClickListener {
-            val builder = AlertDialog.Builder(this)
+            val builder = AlertDialog.Builder(this,R.style.CustomAlertDialog)
             val layout = layoutInflater.inflate(R.layout.settings_dialog, null)
             builder.setView(layout)
             builder.setTitle("Settings for Radius")
@@ -112,7 +112,7 @@ class MainActivity : AppCompatActivity() {
                     try {
                         theftRadius = theftRadiusStr.toInt()
                     } catch (nfe: NumberFormatException) {
-                        val builder1 = AlertDialog.Builder(this)
+                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
                         builder1.setMessage(Html.fromHtml("Radius setting for <b>Thieving</b> alerts is too high, a radius of less than <b>2km</b> is recommended."))
                         builder1.setCancelable(false)
                         builder1.setNegativeButton("OK") { _, _ ->
@@ -120,14 +120,14 @@ class MainActivity : AppCompatActivity() {
                         dialogsQueue.add(builder1)
                     }
                     if (theftRadius < 100) {
-                        val builder1 = AlertDialog.Builder(this)
+                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
                         builder1.setMessage(Html.fromHtml("Radius setting for <b>Thieving</b> alerts is too low, a radius of at least <b>100m</b> is needed."))
                         builder1.setCancelable(false)
                         builder1.setNegativeButton(android.R.string.no) { _, _ ->
                         }
                         dialogsQueue.add(builder1)
                     } else if (theftRadius >= 2000) {
-                        val builder1 = AlertDialog.Builder(this)
+                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
                         builder1.setMessage(Html.fromHtml("Radius setting for <b>Thieving</b> alerts is too high, a radius of less than <b>2km</b> is recommended."))
                         builder1.setCancelable(false)
                         builder1.setNegativeButton("OK") { _, _ ->
@@ -144,7 +144,7 @@ class MainActivity : AppCompatActivity() {
                     try {
                         antiRadius = antiRadiusStr.toInt()
                     } catch (nfe: NumberFormatException) {
-                        val builder1 = AlertDialog.Builder(this)
+                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
                         builder1.setMessage(Html.fromHtml("Radius setting for <b>Anti Social Behaviour</b> alerts too high, a radius of less than <b>2km</b> is recommended."))
                         builder1.setCancelable(false)
                         builder1.setNegativeButton("OK") { _, _ ->
@@ -152,14 +152,14 @@ class MainActivity : AppCompatActivity() {
                         dialogsQueue.add(builder1)
                     }
                     if (antiRadius < 100) {
-                        val builder1 = AlertDialog.Builder(this)
+                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
                         builder1.setMessage(Html.fromHtml("Radius setting for <b>Anti Social Behaviour</b> alerts is too low, a radius of at least <b>100m</b> is needed."))
                         builder1.setCancelable(false)
                         builder1.setNegativeButton("OK") { _, _ ->
                         }
                         dialogsQueue.add(builder1)
                     } else if (antiRadius >= 2000) {
-                        val builder1 = AlertDialog.Builder(this)
+                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
                         builder1.setMessage(Html.fromHtml("Radius setting for <b>Anti Social Behaviour</b> alerts too high, a radius of less than <b>2km</b> is recommended."))
                         builder1.setCancelable(false)
                         builder1.setNegativeButton("OK") { _, _ ->
@@ -176,7 +176,7 @@ class MainActivity : AppCompatActivity() {
                     try {
                         roadRadius = roadRadiusStr.toInt()
                     } catch (nfe: NumberFormatException) {
-                        val builder1 = AlertDialog.Builder(this)
+                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
                         builder1.setMessage(Html.fromHtml("Radius setting for <b>Travel Disruption</b> alerts too high, a radius of less than <b>2km</b> is recommended."))
                         builder1.setCancelable(false)
                         builder1.setNegativeButton("OK") { _, _ ->
@@ -184,14 +184,14 @@ class MainActivity : AppCompatActivity() {
                         dialogsQueue.add(builder1)
                     }
                     if (roadRadius < 100) {
-                        val builder1 = AlertDialog.Builder(this)
+                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
                         builder1.setMessage(Html.fromHtml("Radius setting for <b>Travel Disruption</b> alerts is too low, a radius of at least <b>100m</b> is needed."))
                         builder1.setCancelable(false)
                         builder1.setNegativeButton("OK") { _, _ ->
                         }
                         dialogsQueue.add(builder1)
                     } else if (roadRadius >= 2000) {
-                        val builder1 = AlertDialog.Builder(this)
+                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
                         builder1.setMessage(Html.fromHtml("Radius setting for <b>Travel Disruption</b> alerts too high, a radius of less than <b>2km</b> is recommended."))
                         builder1.setCancelable(false)
                         builder1.setNegativeButton("OK") { _, _ ->
@@ -208,7 +208,7 @@ class MainActivity : AppCompatActivity() {
                     try {
                         majorRadius = majorRadiusStr.toInt()
                     } catch (nfe: NumberFormatException) {
-                        val builder1 = AlertDialog.Builder(this)
+                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
                         builder1.setMessage(Html.fromHtml("Radius setting for <b>Major Disruption</b> alerts is too high, a radius of less than <b>2km</b> is recommended."))
                         builder1.setCancelable(false)
                         builder1.setNegativeButton("OK") { _, _ ->
@@ -216,14 +216,14 @@ class MainActivity : AppCompatActivity() {
                         dialogsQueue.add(builder1)
                     }
                     if (majorRadius < 100) {
-                        val builder1 = AlertDialog.Builder(this)
+                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
                         builder1.setMessage(Html.fromHtml("Radius setting for <b>Major Disruption</b> alerts is too low, a radius of at least <b>100m</b> is needed."))
                         builder1.setCancelable(false)
                         builder1.setNegativeButton("OK") { _, _ ->
                         }
                         dialogsQueue.add(builder1)
                     } else if (majorRadius >= 2000) {
-                        val builder1 = AlertDialog.Builder(this)
+                        val builder1 = AlertDialog.Builder(this,R.style.CustomAlertDialog)
                         builder1.setMessage(Html.fromHtml("Radius setting for <b>Major Disruption</b> alerts is too high, a radius of less than <b>2km</b> is recommended."))
                         builder1.setCancelable(false)
                         builder1.setNegativeButton("OK") { _, _ ->
@@ -235,7 +235,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     radiusList[3] = 400
                 }
-                val confirmationDialog = AlertDialog.Builder(this).setTitle("Confirmation")
+                val confirmationDialog = AlertDialog.Builder(this,R.style.CustomAlertDialog).setTitle("Confirmation")
                     .setMessage(
                         "Radius for Thieving Activity: ${radiusList[0]}m\nRadius for Anti Social Behaviour: ${radiusList[1]}m\n" +
                                 "Radius for Travel Disruptions: ${radiusList[2]}m\nRadius for Major Incidences: ${radiusList[3]}m"
