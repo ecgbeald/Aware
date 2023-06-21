@@ -1,5 +1,6 @@
 package uk.ac.ic.doc.aware
 
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -77,20 +78,28 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (intent.getBooleanExtra("EXIT", false)) {
+            println("EXITING")
+            val webSocketService = Intent(this, WebSocketService::class.java)
+            val geofenceService = Intent(this, GeofenceService::class.java)
+            this.applicationContext.stopService(webSocketService)
+            this.applicationContext.stopService(geofenceService)
+            println("FINISHING")
+            finishAffinity();
+        }
         binding = ActivityMainBinding.inflate(layoutInflater)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         setContentView(binding.root)
         binding.map.setOnClickListener {
             val intent = Intent(this, MapActivity::class.java)
             startActivity(intent)
-            finish();
             // no settings
 //            binding.settings.visibility = View.GONE
         }
         binding.login.setOnClickListener {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
-            finish();
 //            binding.settings.visibility = View.GONE
         }
 //        binding.settings.setOnClickListener {

@@ -56,29 +56,12 @@ class LoginActivity : AppCompatActivity() {
         val request = Request("getsalt",username)
         val requestJson = Gson().toJson(request)
         WebSocketClient.webSocketService.webSocket.send(requestJson)
+
         if (!latch.await(5, TimeUnit.SECONDS)) {
             LoginStatus.isLoggedIn = false
             println("Timeout")
-            val currentActivity = (applicationContext as? AwareApplication)?.getCurrentActivity()
-            currentActivity?.runOnUiThread {
-                val dialogBuilder = AlertDialog.Builder(currentActivity,R.style.CustomAlertDialog)
-                dialogBuilder.setMessage("Connection failure. Retry?")
-                    .setPositiveButton("Retry") { dialog, _ ->
-                        // Retry logic
-                        ActivityCompat.finishAffinity(currentActivity) // Close the app
-                        val intent = Intent(currentActivity, MainActivity::class.java)
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        currentActivity.startActivity(intent) // Reopen MainActivity
-                        finish();
-                    }
-                    .setNegativeButton("Cancel") { dialog, _ ->
-                        // Cancel logic
-                        ActivityCompat.finishAffinity(currentActivity) // Close the app
-                    }
-                    .setCancelable(false)
-                    .create()
-                    .show()
-            }
+            WebSocketClient.webSocketService.salt = "false"
+            Toast.makeText(applicationContext, "Timeout, please try again", Toast.LENGTH_SHORT).show()
         }
         return if (WebSocketClient.webSocketService.salt == "false") {
             LoginStatus.isLoggedIn = false
@@ -93,26 +76,7 @@ class LoginActivity : AppCompatActivity() {
             if (!mLatch.await(5, TimeUnit.SECONDS)) {
                 LoginStatus.isLoggedIn = false
                 println("Timeout")
-                val currentActivity = (applicationContext as? AwareApplication)?.getCurrentActivity()
-                currentActivity?.runOnUiThread {
-                    val dialogBuilder = AlertDialog.Builder(currentActivity,R.style.CustomAlertDialog)
-                    dialogBuilder.setMessage("Connection failure. Retry?")
-                        .setPositiveButton("Retry") { dialog, _ ->
-                            // Retry logic
-                            ActivityCompat.finishAffinity(currentActivity) // Close the app
-                            val intent = Intent(currentActivity, MainActivity::class.java)
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                            currentActivity.startActivity(intent) // Reopen MainActivity
-                            finish();
-                        }
-                        .setNegativeButton("Cancel") { dialog, _ ->
-                            // Cancel logic
-                            ActivityCompat.finishAffinity(currentActivity) // Close the app
-                        }
-                        .setCancelable(false)
-                        .create()
-                        .show()
-                }
+                Toast.makeText(applicationContext, "Timeout, please try again", Toast.LENGTH_SHORT).show()
             }
             LoginStatus.isLoggedIn
         }

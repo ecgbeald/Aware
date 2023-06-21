@@ -73,6 +73,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
     private var permissionDenied = false
     private val selectedItems = mutableListOf(0, 1, 2, 3)
     private val getCalls = 0
+    private var hasTimedout = false
 
     private val london = LatLngBounds(LatLng(51.4035835, -0.3493669), LatLng(51.5827125, 0.018366))
     private val londonBias =
@@ -777,26 +778,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
         WebSocketClient.webSocketService.webSocket.send(requestJson)
         if (!latch.await(5, TimeUnit.SECONDS)) {
             println("Timeout")
-            val currentActivity = (applicationContext as? AwareApplication)?.getCurrentActivity()
-            currentActivity?.runOnUiThread {
-                val dialogBuilder = AlertDialog.Builder(currentActivity, R.style.CustomAlertDialog)
-                dialogBuilder.setMessage("Connection failure. Retry?")
-                    .setPositiveButton("Retry") { dialog, _ ->
-                        // Retry logic
-                        ActivityCompat.finishAffinity(currentActivity) // Close the app
-                        val intent = Intent(currentActivity, MainActivity::class.java)
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        currentActivity.startActivity(intent) // Reopen MainActivity
-                        finish();
-                    }
-                    .setNegativeButton("Cancel") { dialog, _ ->
-                        // Cancel logic
-                        ActivityCompat.finishAffinity(currentActivity) // Close the app
-                    }
-                    .setCancelable(false)
-                    .create()
-                    .show()
-            }
+            Toast.makeText(this@MapActivity, "Timeout, please refresh", Toast.LENGTH_SHORT).show()
+            WebSocketClient.webSocketService.data = listOf()
         }
         for (marker in WebSocketClient.webSocketService.data) {
             println(marker.id)
