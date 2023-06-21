@@ -1,6 +1,6 @@
 package uk.ac.ic.doc.aware.services
 
-import android.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service

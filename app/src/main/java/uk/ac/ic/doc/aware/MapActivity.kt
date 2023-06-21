@@ -141,7 +141,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
         }
 
         findViewById<ImageButton>(R.id.attraction_button).setOnClickListener {
-            val builder = AlertDialog.Builder(this)
+            val builder = AlertDialog.Builder(this, R.style.CustomAlertDialog)
             builder.setTitle("Attractions in London")
             val view = LayoutInflater.from(this).inflate(R.layout.attraction, null)
             builder.setView(view)
@@ -435,7 +435,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
 //            ).show()
             if (WebSocketClient.webSocketService.isLoggedIn) {
                 mMap.setOnInfoWindowClickListener {
-                    val alertDialogBuilder = AlertDialog.Builder(this)
+                    val alertDialogBuilder = AlertDialog.Builder(this,R.style.CustomAlertDialog)
                     val layout = layoutInflater.inflate(R.layout.new_marker_layout, null)
                     alertDialogBuilder.setView(layout)
                     layout.findViewById<EditText>(R.id.titleBox).setText(item.title)
@@ -615,7 +615,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, OnRequestPermission
             println("Timeout")
             val currentActivity = (applicationContext as? AwareApplication)?.getCurrentActivity()
             currentActivity?.runOnUiThread {
-                val dialogBuilder = android.app.AlertDialog.Builder(currentActivity)
+                val dialogBuilder = AlertDialog.Builder(currentActivity, R.style.CustomAlertDialog)
                 dialogBuilder.setMessage("Connection failure. Retry?")
                     .setPositiveButton("Retry") { dialog, _ ->
                         // Retry logic
